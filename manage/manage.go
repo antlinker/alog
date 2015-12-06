@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"text/template"
@@ -77,14 +78,17 @@ func (lm *_LogManage) Writef(level log.LogLevel, tag log.LogTag, format string, 
 
 func (lm *_LogManage) Console(level log.LogLevel, tag log.LogTag, v ...interface{}) {
 	msg := fmt.Sprint(v...)
-	item := lm.logItem(level, tag, msg)
-	lm.console(lm.Template[log.TmplConsole], lm.Template[log.TmplConsoleTime], &item)
+	lm.writeConsole(level, tag, msg)
 }
 
 func (lm *_LogManage) Consolef(level log.LogLevel, tag log.LogTag, format string, v ...interface{}) {
 	msg := fmt.Sprintf(format, v...)
+	lm.writeConsole(level, tag, msg)
+}
+
+func (lm *_LogManage) writeConsole(level log.LogLevel, tag log.LogTag, msg string) {
 	item := lm.logItem(level, tag, msg)
-	lm.console(lm.Template[log.TmplConsole], lm.Template[log.TmplConsoleTime], &item)
+	lm.console(&item)
 }
 
 func (lm *_LogManage) TotalNum() int64 {
@@ -100,7 +104,7 @@ func (lm *_LogManage) writeMsg(level log.LogLevel, tag log.LogTag, msg string) {
 		item.File = lm.file()
 	}
 	if lm.isPrint(&item) {
-		lm.console(lm.Template[log.TmplConsole], lm.Template[log.TmplConsoleTime], &item)
+		lm.console(&item)
 	}
 	lm.Buffer.Push(item)
 }
@@ -117,7 +121,7 @@ func (lm *_LogManage) logItem(level log.LogLevel, tag log.LogTag, msg string) lo
 
 func (lm *_LogManage) file() log.LogFile {
 	var logFile log.LogFile
-	pc, file, line, ok := runtime.Caller(4)
+	pc, file, line, ok := runtime.Caller(lm.Config.Global.FileCaller)
 	if !ok {
 		logFile.Name = "???"
 		logFile.FuncName = "???"
@@ -175,7 +179,7 @@ func (lm *_LogManage) isPrint(item *log.LogItem) bool {
 			return false
 		})
 	}
-	return isPrint && lm.Config.Console.Level < (*item).Level
+	return isPrint
 }
 
 func (lm *_LogManage) isEitherTrue(item *log.LogItem, fns ...func(*_LogManage, *log.LogItem) bool) bool {
@@ -213,8 +217,14 @@ func (lm *_LogManage) levels(item *log.LogItem, fn func(log.LevelConfig) bool) {
 	}
 }
 
-func (lm *_LogManage) console(tmpl, timeTmpl interface{}, item *log.LogItem) {
-	buf := log.ParseLogItemToBuffer(tmpl, timeTmpl, item)
+func (lm *_LogManage) console(item *log.LogItem) {
+	if lm.Config.Console.Level <= (*item).Level {
+		lm.stdout(lm.Template[log.TmplConsole], lm.Template[log.TmplConsoleTime], item)
+	}
+}
+
+func (lm *_LogManage) stdout(tmpl, timetmpl interface{}, item *log.LogItem) {
+	buf := log.ParseLogItemToBuffer(tmpl, timetmpl, item)
 	fmt.Fprintln(os.Stdout, buf.String())
 }
 
@@ -235,7 +245,7 @@ func (lm *_LogManage) store() {
 	defer func() {
 		if err := recover(); err != nil {
 			item := lm.logItem(log.FATAL, "SYSTEM", fmt.Sprint(err))
-			lm.console(log.DefaultSystemTmpl, log.DefaultConsoleTimeTmpl, &item)
+			lm.stdout(log.DefaultSystemTmpl, log.DefaultConsoleTimeTmpl, &item)
 		}
 	}()
 	for {
@@ -265,25 +275,37 @@ func (lm *_LogManage) store() {
 	}
 }
 
+func (lm *_LogManage) target(target map[string]string, ts string) {
+	tsa := strings.Split(ts, ",")
+	for i := 0; i < len(tsa); i++ {
+		t := tsa[i]
+		if t == "" {
+			continue
+		}
+		if _, ok := target[t]; !ok {
+			target[t] = t
+		}
+	}
+}
+
 func (lm *_LogManage) storeTargets(item *log.LogItem) (targets []string) {
 	target := make(map[string]string)
 	rule := lm.Config.Global.Rule
 
 	if rule == log.AlwaysRule || rule == log.GlobalRule {
-		ts := lm.Config.Global.TargetStore
-		target[ts] = ts
+		lm.target(target, lm.Config.Global.TargetStore)
 	}
 	if rule == log.AlwaysRule || rule == log.TagRule {
 		lm.tags(item, func(tag log.TagConfig) bool {
-			ts := tag.Config.TargetStore
-			target[ts] = ts
+			if tag.Level <= item.Level {
+				lm.target(target, tag.Config.TargetStore)
+			}
 			return false
 		})
 	}
 	if rule == log.AlwaysRule || rule == log.LevelRule {
 		lm.levels(item, func(lev log.LevelConfig) bool {
-			ts := lev.Config.TargetStore
-			target[ts] = ts
+			lm.target(target, lev.Config.TargetStore)
 			return false
 		})
 	}

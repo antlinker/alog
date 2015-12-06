@@ -1,0 +1,37 @@
+{
+	console: {
+		level: 0,
+		item: {
+			tmpl: "[{{.ID}} {{.Time}} {{.Level}} {{.Tag}}] {{.Message}}",
+			time: "{{.Hour}}:{{.Minute}}"
+		}
+	},
+	global: {
+	  	print: 0,rule: 1,showfile: 0,caller: 4,interval: 1,target: "file_global",
+	  	buffer: {engine: 1,target: "redis_buffer"}
+	},
+	tags: [{
+  		names: ["ALOG","TEST"],
+  		config: {print: 0,target: "file_global"}
+	}],
+	levels: [{
+  		values: [4,5],
+  		config: {print: 0,target: "file_global"}
+	}],
+	store: {
+		redis: {
+			redis_buffer: {addr: "192.168.33.70:6379",db: 0,poolsize: 10}
+		},
+		file: {
+			file_global: {
+		      filepath: "logs",
+		      filename: "{{.Year}}{{.Month}}{{.Day}}.log",
+		      filesize: 2048,
+		      item: {
+        		tmpl: '{{.ID}} {{.Time}} {{.Level}} {{.Tag}} "{{.FileName}} {{.FileFuncName}} {{.FileLine}}" {{.Message}}',
+		        time: "{{.Year}}-{{.Month}}-{{.Day}} {{.Hour}}:{{.Minute}}:{{.Second}}.{{.MilliSecond}}"
+		      }
+			}
+		}
+	}
+}

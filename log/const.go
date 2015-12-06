@@ -18,6 +18,9 @@ const (
 
 	// DefaultInterval 默认存储写入时间间隔
 	DefaultInterval = 2
+
+	// DefaultFileCaller 默认输出文件信息调用层级
+	DefaultFileCaller = 4
 )
 
 // LogRule 日志规则

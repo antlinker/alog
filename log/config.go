@@ -63,6 +63,9 @@ type GlobalConfig struct {
 	// 0表示不输出
 	// 1表示输出
 	ShowFile int `json:"showfile" yaml:"showfile"`
+	// FileCaller 文件信息调用层级
+	// 默认为4(当前调用)
+	FileCaller int `json:"caller" yaml:"caller"`
 	// Interval 读取缓冲区时间间隔（以秒为单位）
 	// 默认为2秒
 	Interval int `json:"interval" yaml:"interval"`
@@ -93,6 +96,8 @@ type CustomConfig struct {
 type TagConfig struct {
 	// Name 标签名
 	Names []LogTag `json:"names" yaml:"names"`
+	// Level 日志级别
+	Level LogLevel `json:"level" yaml:"level"`
 	// Config 配置
 	Config CustomConfig `json:"config" yaml:"config"`
 }

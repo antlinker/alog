@@ -151,7 +151,7 @@ func output(startTime time.Time, ticker *time.Ticker) {
 	  	}
 	},
 	# 标签配置
-	tags: {
+	tags: [{
 		# 标签名
   		names: ["ALOG","TEST"],
   		# 配置
@@ -164,9 +164,9 @@ func output(startTime time.Time, ticker *time.Ticker) {
 		    # 指向store中定义的存储配置
 		    target: ""
   		}
-	},
+	}],
 	# 级别配置
-	levels: {
+	levels: [{
 		# 标签名
   		values: [4,5],
   		# 配置
@@ -179,7 +179,7 @@ func output(startTime time.Time, ticker *time.Ticker) {
 		    # 指向store中定义的存储配置
 		    target: ""
   		}
-	},
+	}],
 	# 持久化存储配置
 	store: {
 		# redis 存储

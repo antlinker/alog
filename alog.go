@@ -3,6 +3,7 @@ package alog
 import (
 	"errors"
 	"fmt"
+	"os"
 
 	"gopkg.in/alog.v1/log"
 	"gopkg.in/alog.v1/manage"
@@ -22,20 +23,23 @@ func RegisterAlog(config interface{}) {
 	defer func() {
 		if err := recover(); err != nil {
 			fmt.Println("===> [ALog]Initialization error:", err)
+			os.Exit(-1)
 		}
 	}()
 	cfg := new(log.LogConfig)
-	if v, ok := config.(string); ok {
-		err := utils.NewConfig(v).Read(cfg)
-		if err != nil {
-			panic(err)
+	if config != nil {
+		if v, ok := config.(string); ok {
+			err := utils.NewConfig(v).Read(cfg)
+			if err != nil {
+				panic(err)
+			}
+		} else if v, ok := config.(log.LogConfig); ok {
+			cfg = &v
+		} else if v, ok := config.(*log.LogConfig); ok {
+			cfg = v
+		} else {
+			panic(errors.New("Wrong configuration."))
 		}
-	} else if v, ok := config.(log.LogConfig); ok {
-		cfg = &v
-	} else if v, ok := config.(*log.LogConfig); ok {
-		cfg = v
-	} else {
-		panic(errors.New("Wrong configuration."))
 	}
 	if cfg.Console.Item.Tmpl == "" {
 		cfg.Console.Item.Tmpl = log.DefaultConsoleTmpl
@@ -56,6 +60,9 @@ func RegisterAlog(config interface{}) {
 		cfg.Store.File = map[string]log.FileConfig{
 			log.DefaultGlobalKey: log.FileConfig{},
 		}
+	}
+	if cfg.Global.FileCaller == 0 {
+		cfg.Global.FileCaller = log.DefaultFileCaller
 	}
 
 	GLogManage = manage.NewLogManage(cfg)

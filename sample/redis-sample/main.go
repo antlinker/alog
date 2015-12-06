@@ -13,7 +13,7 @@ const (
 	_LogNum = 100000
 	// 日志信息长度
 	_DataLen = 512
-	_LogTag  = "TEST"
+	_LogTag  = "MEMORY"
 )
 
 var (
@@ -37,7 +37,7 @@ func main() {
 	go func() {
 		logInfo := logData()
 		for i := 0; i < _LogNum; i++ {
-			alog.Debug(_LogTag, logInfo)
+			alog.Info(_LogTag, logInfo)
 		}
 	}()
 	endTime := <-_GCHComplete
