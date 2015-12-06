@@ -97,6 +97,10 @@ func (lm *_LogManage) TotalNum() int64 {
 	return lm.total
 }
 
+func (lm *_LogManage) GetConfig() *log.LogConfig {
+	return lm.Config
+}
+
 func (lm *_LogManage) writeMsg(level log.LogLevel, tag log.LogTag, msg string) {
 	item := lm.logItem(level, tag, msg)
 	item.ID = atomic.AddUint64(&_GLOGID, 1)

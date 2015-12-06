@@ -135,6 +135,9 @@ func output(startTime time.Time, ticker *time.Ticker) {
 	  	# 0表示不输出
 	  	# 1表示输出
 	  	showfile: 0,
+	  	# 文件信息调用层级
+	  	# 默认为4(当前调用)
+	  	caller: 4,
 	  	# 读取缓冲区时间间隔（以秒为单位）
 	  	interval: 1,
 	  	# 目标存储
@@ -160,6 +163,8 @@ func output(startTime time.Time, ticker *time.Ticker) {
 		    # 0表示不打印
 		    # 1表示打印
 		    print: 0,
+		    # 日志级别
+		    level: 0,
 		    # 目标存储
 		    # 指向store中定义的存储配置
 		    target: ""
