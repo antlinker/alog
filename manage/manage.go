@@ -111,13 +111,14 @@ func (lm *_LogManage) logItem(level log.LogLevel, tag log.LogTag, msg string) lo
 		Time:    time.Now(),
 		Tag:     tag,
 		Message: msg,
+		File:    lm.file(),
 	}
 	return item
 }
 
 func (lm *_LogManage) file() log.LogFile {
 	var logFile log.LogFile
-	pc, file, line, ok := runtime.Caller(4)
+	pc, file, line, ok := runtime.Caller(5)
 	if !ok {
 		logFile.Name = "???"
 		logFile.FuncName = "???"
