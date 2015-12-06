@@ -13,6 +13,7 @@ import (
 	"gopkg.in/alog.v1/buffer"
 	"gopkg.in/alog.v1/log"
 	"gopkg.in/alog.v1/store"
+	"gopkg.in/alog.v1/utils"
 )
 
 var (
@@ -43,7 +44,7 @@ func NewLogManage(config *log.LogConfig) log.LogManage {
 	default:
 		manage.Buffer = buffer.NewMemoryBuffer()
 	}
-
+	manage.gopath = utils.GetGoPath()
 	manageStore := make(map[string]log.LogStore)
 	if fileStore := cfg.Store.File; fileStore != nil {
 		for fk, fv := range fileStore {
@@ -64,6 +65,7 @@ type _LogManage struct {
 	Template map[log.TmplKey]*template.Template
 	Buffer   log.LogBuffer
 	Store    map[string]log.LogStore
+	gopath   string
 }
 
 func (lm *_LogManage) Write(level log.LogLevel, tag log.LogTag, v ...interface{}) {
@@ -131,9 +133,10 @@ func (lm *_LogManage) file() log.LogFile {
 		logFile.FuncName = "???"
 		return logFile
 	}
-	logFile.Name = file
+
+	logFile.Name = strings.TrimPrefix(file, lm.gopath)
 	logFile.Line = line
-	logFile.FuncName = runtime.FuncForPC(pc).Name()
+	logFile.FuncName = utils.SubstrByStartAfter(runtime.FuncForPC(pc).Name(), "/")
 	return logFile
 }
 
