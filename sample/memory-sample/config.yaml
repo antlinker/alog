@@ -1,6 +1,6 @@
 {
 	global: {
-	  	print: 0,rule: 1,showfile: 1,caller: 4,interval: 1,target: "file_global",
+	  	print: 0,rule: 1,showfile: 1,caller: 5,interval: 1,target: "file_global",
 	  	buffer: {engine: 1}
 	},
 	store: {

@@ -11,15 +11,22 @@ import (
 )
 
 var (
-	// 提供全局的LogManage
-	GLogManage log.LogManage
+	// 提供全局的ALog
+	GALog *ALog
 )
 
+// ALog 提供ALog日志模块的输出管理
+type ALog struct {
+	tag    log.LogTag
+	config *log.LogConfig
+	manage log.LogManage
+}
+
 // RegisterAlog 注册并初始化ALog
-// config 配置信息:
+// configs 配置信息:
 // 配置文件方式，包含yaml,json两种方式
 // 动态配置LogConfig
-func RegisterAlog(config interface{}) {
+func RegisterAlog(configs ...interface{}) {
 	defer func() {
 		if err := recover(); err != nil {
 			fmt.Println("===> [ALog]Initialization error:", err)
@@ -27,7 +34,8 @@ func RegisterAlog(config interface{}) {
 		}
 	}()
 	cfg := new(log.LogConfig)
-	if config != nil {
+	if len(configs) > 0 {
+		config := configs[0]
 		if v, ok := config.(string); ok {
 			err := utils.NewConfig(v).Read(cfg)
 			if err != nil {
@@ -64,106 +72,150 @@ func RegisterAlog(config interface{}) {
 	if cfg.Global.FileCaller == 0 {
 		cfg.Global.FileCaller = log.DefaultFileCaller
 	}
+	GALog = &ALog{
+		manage: manage.NewLogManage(cfg),
+		config: cfg,
+		tag:    log.DefaultTag,
+	}
+}
 
-	GLogManage = manage.NewLogManage(cfg)
+// SetLogTag 设置LogTag
+func (a *ALog) SetLogTag(tag string) {
+	a.tag = log.LogTag(tag)
+}
+
+// GetConfig 获取配置文件信息
+func (a *ALog) GetConfig() *log.LogConfig {
+	return a.config
+}
+
+// GetWriteNum 获取写入日志条数
+func (a *ALog) GetWriteNum() int64 {
+	return a.manage.TotalNum()
+}
+
+// Write 输出消息
+func (a *ALog) Write(onlyConsole bool, level log.LogLevel, tag string, v ...interface{}) {
+	t := log.LogTag(tag)
+	if t == "" {
+		t = a.tag
+	}
+	if onlyConsole {
+		a.manage.Console(level, t, v...)
+		return
+	}
+	a.manage.Write(level, t, v...)
+}
+
+// Writef 输出格式化消息
+func (a *ALog) Writef(onlyConsole bool, level log.LogLevel, tag string, format string, v ...interface{}) {
+	t := log.LogTag(tag)
+	if t == "" {
+		t = a.tag
+	}
+	if onlyConsole {
+		a.manage.Consolef(level, t, format, v...)
+		return
+	}
+	a.manage.Writef(level, t, format, v...)
 }
 
 // Debug Debug消息
-func Debug(tag log.LogTag, v ...interface{}) {
-	GLogManage.Write(log.DEBUG, tag, v...)
+func Debug(tag string, v ...interface{}) {
+	GALog.Write(false, log.DEBUG, tag, v...)
 }
 
 // Debugf 格式化Debug消息
-func Debugf(tag log.LogTag, format string, v ...interface{}) {
-	GLogManage.Writef(log.DEBUG, tag, format, v...)
+func Debugf(tag string, format string, v ...interface{}) {
+	GALog.Writef(false, log.DEBUG, tag, format, v...)
 }
 
 // Debug Debug控制台消息(只输出到控制台，不写入存储)
-func DebugC(tag log.LogTag, v ...interface{}) {
-	GLogManage.Console(log.DEBUG, tag, v...)
+func DebugC(tag string, v ...interface{}) {
+	GALog.Write(true, log.DEBUG, tag, v...)
 }
 
 // Debugf 格式化Debug控制台消息(只输出到控制台，不写入存储)
-func DebugCf(tag log.LogTag, format string, v ...interface{}) {
-	GLogManage.Consolef(log.DEBUG, tag, format, v...)
+func DebugCf(tag string, format string, v ...interface{}) {
+	GALog.Writef(true, log.DEBUG, tag, format, v...)
 }
 
 // Info Info消息
-func Info(tag log.LogTag, v ...interface{}) {
-	GLogManage.Write(log.INFO, tag, v...)
+func Info(tag string, v ...interface{}) {
+	GALog.Write(false, log.INFO, tag, v...)
 }
 
 // Infof 格式化Info消息
-func Infof(tag log.LogTag, format string, v ...interface{}) {
-	GLogManage.Writef(log.INFO, tag, format, v...)
+func Infof(tag string, format string, v ...interface{}) {
+	GALog.Writef(false, log.INFO, tag, format, v...)
 }
 
 // Info Info控制台消息(只输出到控制台，不写入存储)
-func InfoC(tag log.LogTag, v ...interface{}) {
-	GLogManage.Console(log.INFO, tag, v...)
+func InfoC(tag string, v ...interface{}) {
+	GALog.Write(true, log.INFO, tag, v...)
 }
 
 // Infof 格式化Info控制台消息(只输出到控制台，不写入存储)
-func InfoCf(tag log.LogTag, format string, v ...interface{}) {
-	GLogManage.Consolef(log.INFO, tag, format, v...)
+func InfoCf(tag string, format string, v ...interface{}) {
+	GALog.Writef(true, log.INFO, tag, format, v...)
 }
 
 // Warn Warn消息
-func Warn(tag log.LogTag, v ...interface{}) {
-	GLogManage.Write(log.WARN, tag, v...)
+func Warn(tag string, v ...interface{}) {
+	GALog.Write(false, log.WARN, tag, v...)
 }
 
 // Warnf 格式化Warn消息
-func Warnf(tag log.LogTag, format string, v ...interface{}) {
-	GLogManage.Writef(log.WARN, tag, format, v...)
+func Warnf(tag string, format string, v ...interface{}) {
+	GALog.Writef(false, log.WARN, tag, format, v...)
 }
 
 // Warn Warn控制台消息(只输出到控制台，不写入存储)
-func WarnC(tag log.LogTag, v ...interface{}) {
-	GLogManage.Console(log.WARN, tag, v...)
+func WarnC(tag string, v ...interface{}) {
+	GALog.Write(true, log.WARN, tag, v...)
 }
 
 // Warnf 格式化Warn控制台消息(只输出到控制台，不写入存储)
-func WarnCf(tag log.LogTag, format string, v ...interface{}) {
-	GLogManage.Consolef(log.WARN, tag, format, v...)
+func WarnCf(tag string, format string, v ...interface{}) {
+	GALog.Writef(true, log.WARN, tag, format, v...)
 }
 
 // Error Error消息
-func Error(tag log.LogTag, v ...interface{}) {
-	GLogManage.Write(log.ERROR, tag, v...)
+func Error(tag string, v ...interface{}) {
+	GALog.Write(false, log.ERROR, tag, v...)
 }
 
 // Errorf 格式化Error消息
-func Errorf(tag log.LogTag, format string, v ...interface{}) {
-	GLogManage.Writef(log.ERROR, tag, format, v...)
+func Errorf(tag string, format string, v ...interface{}) {
+	GALog.Writef(false, log.ERROR, tag, format, v...)
 }
 
 // Error Error控制台消息(只输出到控制台，不写入存储)
-func ErrorC(tag log.LogTag, v ...interface{}) {
-	GLogManage.Console(log.ERROR, tag, v...)
+func ErrorC(tag string, v ...interface{}) {
+	GALog.Write(true, log.ERROR, tag, v...)
 }
 
 // Errorf 格式化Error控制台消息(只输出到控制台，不写入存储)
-func ErrorCf(tag log.LogTag, format string, v ...interface{}) {
-	GLogManage.Consolef(log.ERROR, tag, format, v...)
+func ErrorCf(tag string, format string, v ...interface{}) {
+	GALog.Writef(true, log.ERROR, tag, format, v...)
 }
 
 // Fatal Fatal消息
-func Fatal(tag log.LogTag, v ...interface{}) {
-	GLogManage.Write(log.FATAL, tag, v...)
+func Fatal(tag string, v ...interface{}) {
+	GALog.Write(false, log.FATAL, tag, v...)
 }
 
 // Fatalf 格式化Fatal消息
-func Fatalf(tag log.LogTag, format string, v ...interface{}) {
-	GLogManage.Writef(log.FATAL, tag, format, v...)
+func Fatalf(tag string, format string, v ...interface{}) {
+	GALog.Writef(false, log.FATAL, tag, format, v...)
 }
 
 // Fatal Fatal控制台消息(只输出到控制台，不写入存储)
-func FatalC(tag log.LogTag, v ...interface{}) {
-	GLogManage.Console(log.FATAL, tag, v...)
+func FatalC(tag string, v ...interface{}) {
+	GALog.Write(true, log.FATAL, tag, v...)
 }
 
 // Fatalf 格式化Fatal控制台消息(只输出到控制台，不写入存储)
-func FatalCf(tag log.LogTag, format string, v ...interface{}) {
-	GLogManage.Consolef(log.FATAL, tag, format, v...)
+func FatalCf(tag string, format string, v ...interface{}) {
+	GALog.Writef(true, log.FATAL, tag, format, v...)
 }

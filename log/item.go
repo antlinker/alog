@@ -27,6 +27,8 @@ type LogTag string
 type LogFile struct {
 	// Name 文件名
 	Name string
+	// ShortName 短文件名
+	ShortName string
 	// FuncName 函数名
 	FuncName string
 	// Line 文件行

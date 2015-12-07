@@ -13,7 +13,6 @@ const (
 	_LogNum = 100000
 	// 日志信息长度
 	_DataLen = 512
-	_LogTag  = "MEMORY"
 )
 
 var (
@@ -32,12 +31,13 @@ func main() {
 	_GCHComplete = make(chan time.Time, 1)
 	startTime := time.Now()
 	alog.RegisterAlog("config.yaml")
+	alog.GALog.SetLogTag("REDIS")
 	ticker := time.NewTicker(time.Second)
 	go output(startTime, ticker)
 	go func() {
 		logInfo := logData()
 		for i := 0; i < _LogNum; i++ {
-			alog.Info(_LogTag, logInfo)
+			alog.Info("", logInfo)
 		}
 	}()
 	endTime := <-_GCHComplete
@@ -48,7 +48,7 @@ func main() {
 
 func output(startTime time.Time, ticker *time.Ticker) {
 	for t := range ticker.C {
-		totalNum := alog.GLogManage.TotalNum()
+		totalNum := alog.GALog.GetWriteNum()
 		currentSecond := float64(t.Sub(startTime)) / float64(time.Second)
 		info := fmt.Sprintf("\r ===> 写入日志条数：%d,用时：%.2fs", totalNum, currentSecond)
 		fmt.Print(info)

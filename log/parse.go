@@ -64,6 +64,7 @@ func ParseLogItemToBuffer(tmpl interface{}, timeTmpl interface{}, data *LogItem)
 		"Message":      (*data).Message,
 		"FileName":     (*data).File.Name,
 		"FileFuncName": (*data).File.FuncName,
+		"ShortName":    (*data).File.ShortName,
 		"FileLine":     (*data).File.Line,
 	}
 	buf, err := utils.NewParseTmpl(tmpl).Parse(lData)

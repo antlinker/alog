@@ -1,13 +1,13 @@
 {
 	console: {
-		level: 0,
+		level: 1,
 		item: {
 			tmpl: "[{{.ID}} {{.Time}} {{.Level}} {{.Tag}}] {{.Message}}",
 			time: "{{.Hour}}:{{.Minute}}"
 		}
 	},
 	global: {
-	  	print: 0,rule: 1,showfile: 0,caller: 4,interval: 1,target: "file_global",
+	  	print: 0,rule: 1,showfile: 0,caller: 5,interval: 1,target: "file_global",
 	  	buffer: {engine: 1,target: "redis_buffer"}
 	},
 	tags: [{

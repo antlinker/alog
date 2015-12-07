@@ -14,6 +14,7 @@
 		    # Tag 标签
 		    # Message 日志明细
 		    # FileName 文件名
+		    # ShortName 短文件名
 		    # FileFuncName 函数名
 		    # FileLine 文件行
 			tmpl: "[{{.ID}} {{.Time}} {{.Level}} {{.Tag}}] {{.Message}}",
@@ -47,8 +48,8 @@
 	  	# 1表示输出
 	  	showfile: 0,
 	  	# 文件信息调用层级
-	  	# 默认为4(当前调用)
-	  	caller: 4,
+	  	# 默认为5(当前调用)
+	  	caller: 5,
 	  	# 读取缓冲区时间间隔（以秒为单位）
 	  	interval: 1,
 	  	# 目标存储

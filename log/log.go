@@ -26,6 +26,4 @@ type LogManage interface {
 	Consolef(level LogLevel, tag LogTag, format string, v ...interface{})
 	// TotalNum 写入日志总条数
 	TotalNum() int64
-	// GetConfig 获取配置文件信息
-	GetConfig() *LogConfig
 }

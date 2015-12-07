@@ -1,5 +1,11 @@
 # HISTORY
 
+## v1.0.3
+
+* 增加`ALog`结构体，提供统一的处理函数
+* 加入`ShortName`(短文件名)日志项模板格式
+* 调整`README.md`
+
 ## v1.0.2
 
 * `target`可以指向多个store,以`,`分隔

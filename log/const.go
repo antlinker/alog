@@ -20,7 +20,7 @@ const (
 	DefaultInterval = 2
 
 	// DefaultFileCaller 默认输出文件信息调用层级
-	DefaultFileCaller = 4
+	DefaultFileCaller = 5
 )
 
 // LogRule 日志规则

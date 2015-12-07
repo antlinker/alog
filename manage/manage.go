@@ -10,6 +10,8 @@ import (
 	"text/template"
 	"time"
 
+	"gopkg.in/alog.v1/utils"
+
 	"gopkg.in/alog.v1/buffer"
 	"gopkg.in/alog.v1/log"
 	"gopkg.in/alog.v1/store"
@@ -97,10 +99,6 @@ func (lm *_LogManage) TotalNum() int64 {
 	return lm.total
 }
 
-func (lm *_LogManage) GetConfig() *log.LogConfig {
-	return lm.Config
-}
-
 func (lm *_LogManage) writeMsg(level log.LogLevel, tag log.LogTag, msg string) {
 	item := lm.logItem(level, tag, msg)
 	item.ID = atomic.AddUint64(&_GLOGID, 1)
@@ -132,8 +130,9 @@ func (lm *_LogManage) file() log.LogFile {
 		return logFile
 	}
 	logFile.Name = file
+	logFile.ShortName = utils.SubstrByStartAfter(file, "/")
 	logFile.Line = line
-	logFile.FuncName = runtime.FuncForPC(pc).Name()
+	logFile.FuncName = utils.SubstrByStartAfter(runtime.FuncForPC(pc).Name(), "/")
 	return logFile
 }
 

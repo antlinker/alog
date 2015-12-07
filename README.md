@@ -1,90 +1,18 @@
 # ALog
 
-> 基于Golang的分布式日志包
+> 基于Golang的异步日志包
 
-## 获取
+## Installation and usage
 
 ``` bash
 $ go get gopkg.in/alog.v1
 ```
 
-## 日志测试
+## API documentation
 
-``` go
-package main
+* [https://godoc.org/gopkg.in/alog.v1](https://godoc.org/gopkg.in/alog.v1)
 
-import (
-	"bytes"
-	"fmt"
-	"time"
-
-	"gopkg.in/alog.v1"
-)
-
-const (
-	// 写入日志条数
-	_LogNum = 100000
-	// 日志信息长度
-	_DataLen = 512
-	// 日志测试标签
-	_LogTag  = "TEST"
-)
-
-var (
-	_GCHComplete chan time.Time
-)
-
-func logData() string {
-	buf := new(bytes.Buffer)
-	for i := 0; i < _DataLen; i++ {
-		buf.WriteByte('a')
-	}
-	return buf.String()
-}
-
-func main() {
-	_GCHComplete = make(chan time.Time, 1)
-	startTime := time.Now()
-	alog.RegisterAlog("config.yaml")
-	ticker := time.NewTicker(time.Second)
-	go output(startTime, ticker)
-	go func() {
-		logInfo := logData()
-		for i := 0; i < _LogNum; i++ {
-			alog.Debug(_LogTag, logInfo)
-		}
-	}()
-	endTime := <-_GCHComplete
-	useSecond := float64(endTime.Sub(startTime))/float64(time.Second) - 1
-	fmt.Printf("\n===> 文件日志写入,总条数：%d,总耗时：%.2fs,每条日志长度：%d,每秒写入日志条数：%d\n",
-		_LogNum, useSecond, _DataLen, int64(_LogNum)/int64(useSecond))
-}
-
-func output(startTime time.Time, ticker *time.Ticker) {
-	for t := range ticker.C {
-		totalNum := alog.GLogManage.TotalNum()
-		currentSecond := float64(t.Sub(startTime)) / float64(time.Second)
-		info := fmt.Sprintf("\r ===> 写入日志条数：%d,用时：%.2fs", totalNum, currentSecond)
-		fmt.Print(info)
-		if totalNum == int64(_LogNum) {
-			ticker.Stop()
-			_GCHComplete <- time.Now()
-		}
-	}
-}
-
-```
-
-## 输出结果
-
-``` bash
-# 内存写入统计
-# ===> 文件日志写入,总条数：100000,总耗时：13.00s,每条日志长度：512,每秒写入日志条数：7692
-# redis写入统计
-# ===> 文件日志写入,总条数：100000,总耗时：72.01s,每条日志长度：512,每秒写入日志条数：1388
-```
-
-## 配置文件说明
+## Configuration file
 
 ``` yaml
 {
@@ -103,6 +31,7 @@ func output(startTime time.Time, ticker *time.Ticker) {
 		    # Tag 标签
 		    # Message 日志明细
 		    # FileName 文件名
+		    # ShortName 短文件名
 		    # FileFuncName 函数名
 		    # FileLine 文件行
 			tmpl: "[{{.ID}} {{.Time}} {{.Level}} {{.Tag}}] {{.Message}}",
@@ -136,8 +65,8 @@ func output(startTime time.Time, ticker *time.Ticker) {
 	  	# 1表示输出
 	  	showfile: 0,
 	  	# 文件信息调用层级
-	  	# 默认为4(当前调用)
-	  	caller: 4,
+	  	# 默认为5当前调用)
+	  	caller: 5,
 	  	# 读取缓冲区时间间隔（以秒为单位）
 	  	interval: 1,
 	  	# 目标存储
@@ -228,6 +157,89 @@ func output(startTime time.Time, ticker *time.Ticker) {
 		}
 	}
 }
+```
+
+## Sample
+
+``` go
+package main
+
+import (
+	"time"
+
+	"gopkg.in/alog.v1"
+)
+
+func main() {
+	alog.RegisterAlog("config.yaml")
+	alog.Debug("Debug", "Debug info...")
+	alog.DebugC("Debug", "Debug console info...")
+	alog.Info("Info", "Info info...")
+	alog.InfoC("Info", "Info console info...")
+	alog.Warn("Warn", "Warn info...")
+	alog.WarnC("Warn", "Warn console info...")
+	alog.Error("Error", "Error info...")
+	alog.ErrorC("Error", "Error console info...")
+	alog.Fatal("Fatal", "Fatal info...")
+	alog.FatalC("Fatal", "Fatal console info...")
+	time.Sleep(2 * time.Second)
+}
+```
+
+### config.yaml:
+
+``` yaml
+{
+	console: {
+		level: 1,
+		item: {
+			tmpl: "[{{.ID}} {{.Time}} {{.Level}} {{.Tag}}] {{.Message}}",
+			time: "{{.Hour}}:{{.Minute}}"
+		}
+	},
+	global: {
+	  	print: 1,rule: 1,showfile: 1,caller: 5,interval: 1,target: "file_global",
+	  	buffer: {engine: 1}
+	},
+	store: {
+		file: {
+			file_global: {
+		      filepath: "logs",
+		      filename: "{{.Year}}{{.Month}}{{.Day}}.log",
+		      filesize: 2048,
+		      item: {
+        		tmpl: '{{.ID}} {{.Time}} {{.Level}} {{.Tag}} "{{.ShortName}} {{.FileLine}} {{.FileFuncName}}" {{.Message}}',
+		        time: "{{.Year}}-{{.Month}}-{{.Day}} {{.Hour}}:{{.Minute}}:{{.Second}}.{{.MilliSecond}}"
+		      }
+			}
+		}
+	}
+}
+```
+
+### Console Output:
+
+```
+[1 17:13 Debug Debug] Debug info...
+[0 17:13 Debug Debug] Debug console info...
+[2 17:13 Info Info] Info info...
+[0 17:13 Info Info] Info console info...
+[3 17:13 Warn Warn] Warn info...
+[0 17:13 Warn Warn] Warn console info...
+[4 17:13 Error Error] Error info...
+[0 17:13 Error Error] Error console info...
+[5 17:13 Fatal Fatal] Fatal info...
+[0 17:13 Fatal Fatal] Fatal console info...
+```
+
+### File Output:
+
+```
+1 2015-12-07 17:13:46.540 Debug Debug "main.go 11 main.main" Debug info...
+2 2015-12-07 17:13:46.540 Info Info "main.go 13 main.main" Info info...
+3 2015-12-07 17:13:46.540 Warn Warn "main.go 15 main.main" Warn info...
+4 2015-12-07 17:13:46.540 Error Error "main.go 17 main.main" Error info...
+5 2015-12-07 17:13:46.540 Fatal Fatal "main.go 19 main.main" Fatal info...
 ```
 
 ## License
