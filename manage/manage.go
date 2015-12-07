@@ -10,11 +10,10 @@ import (
 	"text/template"
 	"time"
 
-	"gopkg.in/alog.v1/utils"
-
 	"gopkg.in/alog.v1/buffer"
 	"gopkg.in/alog.v1/log"
 	"gopkg.in/alog.v1/store"
+	"gopkg.in/alog.v1/utils"
 )
 
 var (
@@ -45,7 +44,6 @@ func NewLogManage(config *log.LogConfig) log.LogManage {
 	default:
 		manage.Buffer = buffer.NewMemoryBuffer()
 	}
-
 	manageStore := make(map[string]log.LogStore)
 	if fileStore := cfg.Store.File; fileStore != nil {
 		for fk, fv := range fileStore {
