@@ -10,7 +10,7 @@ import (
 
 const (
 	// 写入日志条数
-	_LogNum = 100
+	_LogNum = 1000
 	// 日志信息长度
 	_DataLen = 512
 )
@@ -31,13 +31,13 @@ func main() {
 	_GCHComplete = make(chan time.Time, 1)
 	startTime := time.Now()
 	alog.RegisterAlog("config.yaml")
-	alog.GALog.SetLogTag("MEMORY")
+	alog.GALog.SetLogTag("TEST")
 	ticker := time.NewTicker(time.Second)
 	go output(startTime, ticker)
 	go func() {
 		logInfo := logData()
 		for i := 0; i < _LogNum; i++ {
-			alog.Info("", logInfo)
+			alog.Info(logInfo)
 		}
 	}()
 	endTime := <-_GCHComplete

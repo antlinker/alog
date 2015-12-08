@@ -37,7 +37,7 @@ func main() {
 	go func() {
 		logInfo := logData()
 		for i := 0; i < _LogNum; i++ {
-			alog.Info("", logInfo)
+			alog.Info(logInfo)
 		}
 	}()
 	endTime := <-_GCHComplete

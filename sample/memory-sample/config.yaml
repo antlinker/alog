@@ -1,13 +1,26 @@
 {
 	global: {
-	  	print: 0,rule: 1,showfile: 1,caller: 5,interval: 1,target: "file_global",
+	  	print: 0,rule: 0,showfile: 1,caller: 5,interval: 1,target: "file_global",
 	  	buffer: {engine: 1}
 	},
+	tags: [{
+  		names: ["TEST"],
+  		config: {print: 0,target: "test_global"}
+	}],
 	store: {
 		file: {
 			file_global: {
 		      filepath: "logs",
 		      filename: "{{.Year}}{{.Month}}{{.Day}}.log",
+		      filesize: 2048,
+		      item: {
+        		tmpl: '{{.ID}} {{.Time}} {{.Level}} {{.Tag}} "{{.FileName}} {{.FileFuncName}} {{.FileLine}}" {{.Message}}',
+		        time: "{{.Year}}-{{.Month}}-{{.Day}} {{.Hour}}:{{.Minute}}:{{.Second}}.{{.MilliSecond}}"
+		      }
+			},
+			test_global: {
+		      filepath: "logs",
+		      filename: "test.{{.Year}}{{.Month}}{{.Day}}.log",
 		      filesize: 2048,
 		      item: {
         		tmpl: '{{.ID}} {{.Time}} {{.Level}} {{.Tag}} "{{.FileName}} {{.FileFuncName}} {{.FileLine}}" {{.Message}}',

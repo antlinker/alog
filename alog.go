@@ -1,18 +1,11 @@
 package alog
 
 import (
-	"errors"
 	"fmt"
 	"os"
 
 	"gopkg.in/alog.v1/log"
 	"gopkg.in/alog.v1/manage"
-	"gopkg.in/alog.v1/utils"
-)
-
-var (
-	// 提供全局的ALog
-	GALog *ALog
 )
 
 // ALog 提供ALog日志模块的输出管理
@@ -22,66 +15,48 @@ type ALog struct {
 	manage log.LogManage
 }
 
-// RegisterAlog 注册并初始化ALog
-// configs 配置信息:
-// 配置文件方式，包含yaml,json两种方式
-// 动态配置LogConfig
-func RegisterAlog(configs ...interface{}) {
+// NewALog 获取ALog实例
+func NewALog(configs ...interface{}) *ALog {
 	defer func() {
 		if err := recover(); err != nil {
 			fmt.Println("===> [ALog]Initialization error:", err)
 			os.Exit(-1)
 		}
 	}()
-	cfg := new(log.LogConfig)
+	var config *log.LogConfig
 	if len(configs) > 0 {
-		config := configs[0]
-		if v, ok := config.(string); ok {
-			err := utils.NewConfig(v).Read(cfg)
-			if err != nil {
-				panic(err)
-			}
-		} else if v, ok := config.(log.LogConfig); ok {
-			cfg = &v
-		} else if v, ok := config.(*log.LogConfig); ok {
-			cfg = v
-		} else {
-			panic(errors.New("Wrong configuration."))
+		cfg, err := parseConfig(configs[0])
+		if err != nil {
+			panic(err)
 		}
+		config = cfg
+	} else if _GConfig != nil {
+		cfg := *_GConfig
+		config = &cfg
+	} else {
+		config = defaultConfig()
 	}
-	if cfg.Console.Item.Tmpl == "" {
-		cfg.Console.Item.Tmpl = log.DefaultConsoleTmpl
-	}
-	if cfg.Console.Item.TimeTmpl == "" {
-		cfg.Console.Item.TimeTmpl = log.DefaultConsoleTimeTmpl
-	}
-	if cfg.Global.Interval == 0 {
-		cfg.Global.Interval = log.DefaultInterval
-	}
-	if cfg.Global.Buffer.Engine == 0 {
-		cfg.Global.Buffer.Engine = log.MEMORY_BUFFER
-	}
-	if cfg.Global.TargetStore == "" {
-		cfg.Global.TargetStore = log.DefaultGlobalKey
-	}
-	if cfg.Store.File == nil {
-		cfg.Store.File = map[string]log.FileConfig{
-			log.DefaultGlobalKey: log.FileConfig{},
-		}
-	}
-	if cfg.Global.FileCaller == 0 {
-		cfg.Global.FileCaller = log.DefaultFileCaller
-	}
-	GALog = &ALog{
-		manage: manage.NewLogManage(cfg),
-		config: cfg,
+	alg := &ALog{
+		config: config,
+		manage: manage.NewLogManage(config),
 		tag:    log.DefaultTag,
 	}
+	return alg
 }
 
 // SetLogTag 设置LogTag
 func (a *ALog) SetLogTag(tag string) {
 	a.tag = log.LogTag(tag)
+}
+
+// SetFileCaller 设置文件调用层次
+func (a *ALog) SetFileCaller(caller int) {
+	(*(a.config)).Global.FileCaller = caller
+}
+
+// SetRule 设置输出规则
+func (a *ALog) SetRule(rule log.LogRule) {
+	(*(a.config)).Global.Rule = rule
 }
 
 // GetConfig 获取配置文件信息
@@ -120,102 +95,162 @@ func (a *ALog) Writef(onlyConsole bool, level log.LogLevel, tag string, format s
 	a.manage.Writef(level, t, format, v...)
 }
 
-// Debug Debug消息
-func Debug(tag string, v ...interface{}) {
-	GALog.Write(false, log.DEBUG, tag, v...)
+func (a *ALog) Debug(v ...interface{}) {
+	a.Write(false, log.DEBUG, "", v...)
 }
 
-// Debugf 格式化Debug消息
-func Debugf(tag string, format string, v ...interface{}) {
-	GALog.Writef(false, log.DEBUG, tag, format, v...)
+func (a *ALog) Debugf(format string, v ...interface{}) {
+	a.Writef(false, log.DEBUG, "", format, v...)
 }
 
-// Debug Debug控制台消息(只输出到控制台，不写入存储)
-func DebugC(tag string, v ...interface{}) {
-	GALog.Write(true, log.DEBUG, tag, v...)
+func (a *ALog) DebugT(tag string, v ...interface{}) {
+	a.Write(false, log.DEBUG, tag, v...)
 }
 
-// Debugf 格式化Debug控制台消息(只输出到控制台，不写入存储)
-func DebugCf(tag string, format string, v ...interface{}) {
-	GALog.Writef(true, log.DEBUG, tag, format, v...)
+func (a *ALog) DebugTf(tag string, format string, v ...interface{}) {
+	a.Writef(false, log.DEBUG, tag, format, v...)
 }
 
-// Info Info消息
-func Info(tag string, v ...interface{}) {
-	GALog.Write(false, log.INFO, tag, v...)
+func (a *ALog) DebugC(v ...interface{}) {
+	a.Write(true, log.DEBUG, "", v...)
 }
 
-// Infof 格式化Info消息
-func Infof(tag string, format string, v ...interface{}) {
-	GALog.Writef(false, log.INFO, tag, format, v...)
+func (a *ALog) DebugCf(format string, v ...interface{}) {
+	a.Writef(true, log.DEBUG, "", format, v...)
 }
 
-// Info Info控制台消息(只输出到控制台，不写入存储)
-func InfoC(tag string, v ...interface{}) {
-	GALog.Write(true, log.INFO, tag, v...)
+func (a *ALog) DebugTC(tag string, v ...interface{}) {
+	a.Write(true, log.DEBUG, tag, v...)
 }
 
-// Infof 格式化Info控制台消息(只输出到控制台，不写入存储)
-func InfoCf(tag string, format string, v ...interface{}) {
-	GALog.Writef(true, log.INFO, tag, format, v...)
+func (a *ALog) DebugTCf(tag string, format string, v ...interface{}) {
+	a.Writef(true, log.DEBUG, tag, format, v...)
 }
 
-// Warn Warn消息
-func Warn(tag string, v ...interface{}) {
-	GALog.Write(false, log.WARN, tag, v...)
+func (a *ALog) Info(v ...interface{}) {
+	a.Write(false, log.INFO, "", v...)
 }
 
-// Warnf 格式化Warn消息
-func Warnf(tag string, format string, v ...interface{}) {
-	GALog.Writef(false, log.WARN, tag, format, v...)
+func (a *ALog) Infof(format string, v ...interface{}) {
+	a.Writef(false, log.INFO, "", format, v...)
 }
 
-// Warn Warn控制台消息(只输出到控制台，不写入存储)
-func WarnC(tag string, v ...interface{}) {
-	GALog.Write(true, log.WARN, tag, v...)
+func (a *ALog) InfoT(tag string, v ...interface{}) {
+	a.Write(false, log.INFO, tag, v...)
 }
 
-// Warnf 格式化Warn控制台消息(只输出到控制台，不写入存储)
-func WarnCf(tag string, format string, v ...interface{}) {
-	GALog.Writef(true, log.WARN, tag, format, v...)
+func (a *ALog) InfoTf(tag string, format string, v ...interface{}) {
+	a.Writef(false, log.INFO, tag, format, v...)
 }
 
-// Error Error消息
-func Error(tag string, v ...interface{}) {
-	GALog.Write(false, log.ERROR, tag, v...)
+func (a *ALog) InfoC(v ...interface{}) {
+	a.Write(true, log.INFO, "", v...)
 }
 
-// Errorf 格式化Error消息
-func Errorf(tag string, format string, v ...interface{}) {
-	GALog.Writef(false, log.ERROR, tag, format, v...)
+func (a *ALog) InfoCf(format string, v ...interface{}) {
+	a.Writef(true, log.INFO, "", format, v...)
 }
 
-// Error Error控制台消息(只输出到控制台，不写入存储)
-func ErrorC(tag string, v ...interface{}) {
-	GALog.Write(true, log.ERROR, tag, v...)
+func (a *ALog) InfoTC(tag string, v ...interface{}) {
+	a.Write(true, log.INFO, tag, v...)
 }
 
-// Errorf 格式化Error控制台消息(只输出到控制台，不写入存储)
-func ErrorCf(tag string, format string, v ...interface{}) {
-	GALog.Writef(true, log.ERROR, tag, format, v...)
+func (a *ALog) InfoTCf(tag string, format string, v ...interface{}) {
+	a.Writef(true, log.INFO, tag, format, v...)
 }
 
-// Fatal Fatal消息
-func Fatal(tag string, v ...interface{}) {
-	GALog.Write(false, log.FATAL, tag, v...)
+func (a *ALog) Warn(v ...interface{}) {
+	a.Write(false, log.WARN, "", v...)
 }
 
-// Fatalf 格式化Fatal消息
-func Fatalf(tag string, format string, v ...interface{}) {
-	GALog.Writef(false, log.FATAL, tag, format, v...)
+func (a *ALog) Warnf(format string, v ...interface{}) {
+	a.Writef(false, log.WARN, "", format, v...)
 }
 
-// Fatal Fatal控制台消息(只输出到控制台，不写入存储)
-func FatalC(tag string, v ...interface{}) {
-	GALog.Write(true, log.FATAL, tag, v...)
+func (a *ALog) WarnT(tag string, v ...interface{}) {
+	a.Write(false, log.WARN, tag, v...)
 }
 
-// Fatalf 格式化Fatal控制台消息(只输出到控制台，不写入存储)
-func FatalCf(tag string, format string, v ...interface{}) {
-	GALog.Writef(true, log.FATAL, tag, format, v...)
+func (a *ALog) WarnTf(tag string, format string, v ...interface{}) {
+	a.Writef(false, log.WARN, tag, format, v...)
+}
+
+func (a *ALog) WarnC(v ...interface{}) {
+	a.Write(true, log.WARN, "", v...)
+}
+
+func (a *ALog) WarnCf(format string, v ...interface{}) {
+	a.Writef(true, log.WARN, "", format, v...)
+}
+
+func (a *ALog) WarnTC(tag string, v ...interface{}) {
+	a.Write(true, log.WARN, tag, v...)
+}
+
+func (a *ALog) WarnTCf(tag string, format string, v ...interface{}) {
+	a.Writef(true, log.WARN, tag, format, v...)
+}
+
+func (a *ALog) Error(v ...interface{}) {
+	a.Write(false, log.ERROR, "", v...)
+}
+
+func (a *ALog) Errorf(format string, v ...interface{}) {
+	a.Writef(false, log.ERROR, "", format, v...)
+}
+
+func (a *ALog) ErrorT(tag string, v ...interface{}) {
+	a.Write(false, log.ERROR, tag, v...)
+}
+
+func (a *ALog) ErrorTf(tag string, format string, v ...interface{}) {
+	a.Writef(false, log.ERROR, tag, format, v...)
+}
+
+func (a *ALog) ErrorC(v ...interface{}) {
+	a.Write(true, log.ERROR, "", v...)
+}
+
+func (a *ALog) ErrorCf(format string, v ...interface{}) {
+	a.Writef(true, log.ERROR, "", format, v...)
+}
+
+func (a *ALog) ErrorTC(tag string, v ...interface{}) {
+	a.Write(true, log.ERROR, tag, v...)
+}
+
+func (a *ALog) ErrorTCf(tag string, format string, v ...interface{}) {
+	a.Writef(true, log.ERROR, tag, format, v...)
+}
+
+func (a *ALog) Fatal(v ...interface{}) {
+	a.Write(false, log.FATAL, "", v...)
+}
+
+func (a *ALog) Fatalf(format string, v ...interface{}) {
+	a.Writef(false, log.FATAL, "", format, v...)
+}
+
+func (a *ALog) FatalT(tag string, v ...interface{}) {
+	a.Write(false, log.FATAL, tag, v...)
+}
+
+func (a *ALog) FatalTf(tag string, format string, v ...interface{}) {
+	a.Writef(false, log.FATAL, tag, format, v...)
+}
+
+func (a *ALog) FatalC(v ...interface{}) {
+	a.Write(true, log.FATAL, "", v...)
+}
+
+func (a *ALog) FatalCf(format string, v ...interface{}) {
+	a.Writef(true, log.FATAL, "", format, v...)
+}
+
+func (a *ALog) FatalTC(tag string, v ...interface{}) {
+	a.Write(true, log.FATAL, tag, v...)
+}
+
+func (a *ALog) FatalTCf(tag string, format string, v ...interface{}) {
+	a.Writef(true, log.FATAL, tag, format, v...)
 }
