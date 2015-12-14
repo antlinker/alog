@@ -1,6 +1,9 @@
 package log
 
 const (
+	// DefaultEnabled 默认启用日志
+	DefaultEnabled = 1
+
 	// DefaultTag 默认日志标签
 	DefaultTag LogTag = "ALOG"
 

@@ -49,6 +49,12 @@ type LogItemConfig struct {
 
 // GlobalConfig 全局配置
 type GlobalConfig struct {
+	// IsEnabled 是否启用日志
+	// 参数说明：
+	// 1表示启用
+	// 2表示不启用
+	// 默认值为1
+	IsEnabled int `yaml:"enabled" json:"enabled"`
 	// IsPrint 是否控制台打印
 	IsPrint int `yaml:"print" json:"print"`
 	// Rule 日志输出规则

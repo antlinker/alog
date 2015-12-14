@@ -24,12 +24,14 @@ func parseConfig(config interface{}) (*log.LogConfig, error) {
 			return nil, errors.New("Wrong configuration.")
 		}
 	}
-	loadDefaultConfig(cfg)
 	return cfg, nil
 }
 
 // 加载配置文件默认参数
 func loadDefaultConfig(config *log.LogConfig) {
+	if (*config).Global.IsEnabled == 0 {
+		(*config).Global.IsEnabled = log.DefaultEnabled
+	}
 	if (*config).Console.Item.Tmpl == "" {
 		(*config).Console.Item.Tmpl = log.DefaultConsoleTmpl
 	}

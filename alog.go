@@ -71,6 +71,9 @@ func (a *ALog) GetWriteNum() int64 {
 
 // Write 输出消息
 func (a *ALog) Write(onlyConsole bool, level log.LogLevel, tag string, v ...interface{}) {
+	if a.config.Global.IsEnabled != 1 {
+		return
+	}
 	t := log.LogTag(tag)
 	if t == "" {
 		t = a.tag
@@ -84,6 +87,9 @@ func (a *ALog) Write(onlyConsole bool, level log.LogLevel, tag string, v ...inte
 
 // Writef 输出格式化消息
 func (a *ALog) Writef(onlyConsole bool, level log.LogLevel, tag string, format string, v ...interface{}) {
+	if a.config.Global.IsEnabled != 1 {
+		return
+	}
 	t := log.LogTag(tag)
 	if t == "" {
 		t = a.tag

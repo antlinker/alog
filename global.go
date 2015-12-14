@@ -32,7 +32,10 @@ func RegisterAlog(configs ...interface{}) {
 			panic(err)
 		}
 		config = cfg
+	} else {
+		config = new(log.LogConfig)
 	}
+	loadDefaultConfig(config)
 	_GConfig = config
 	GALog = &ALog{
 		manage: manage.NewLogManage(config),
