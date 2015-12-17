@@ -64,7 +64,9 @@ type GlobalConfig struct {
 	// 2表示指定Tag配置输出
 	// 3表示指定Level配置输出
 	// 默认值为0
-	Rule LogRule `json:"rule" yaml:"rule" `
+	Rule LogRule `json:"rule" yaml:"rule"`
+	// Level 日志级别
+	Level LogLevel `json:"level" yaml:"level"`
 	// ShowFile 是否输出日志文件信息，包括：文件名、行数、函数名
 	// 0表示不输出
 	// 1表示输出

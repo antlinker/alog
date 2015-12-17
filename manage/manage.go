@@ -51,7 +51,10 @@ func NewLogManage(config *log.LogConfig) log.LogManage {
 		}
 	}
 	manage.Store = manageStore
-	go manage.execStore()
+
+	if cfg.Global.IsEnabled == 1 {
+		go manage.execStore()
+	}
 
 	return manage
 }
@@ -231,13 +234,8 @@ func (lm *_LogManage) stdout(tmpl, timetmpl interface{}, item *log.LogItem) {
 
 func (lm *_LogManage) execStore() {
 	interval := time.Duration(lm.Config.Global.Interval) * time.Second
-	time.Sleep(interval)
-	lm.afterStore(interval)
-}
-
-func (lm *_LogManage) afterStore(interval time.Duration) {
-	lm.store()
 	time.AfterFunc(interval, func() {
+		lm.store()
 		lm.execStore()
 	})
 }
@@ -294,7 +292,9 @@ func (lm *_LogManage) storeTargets(item *log.LogItem) (targets []string) {
 	rule := lm.Config.Global.Rule
 
 	if rule == log.AlwaysRule || rule == log.GlobalRule {
-		lm.target(target, lm.Config.Global.TargetStore)
+		if lm.Config.Global.Level <= item.Level {
+			lm.target(target, lm.Config.Global.TargetStore)
+		}
 	}
 	if rule == log.AlwaysRule || rule == log.TagRule {
 		lm.tags(item, func(tag log.TagConfig) bool {

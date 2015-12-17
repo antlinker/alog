@@ -49,6 +49,12 @@ $ go get gopkg.in/alog.v1
 	},
 	# 全局配置
 	global: {
+		# IsEnabled 是否启用日志
+		# 参数说明：
+		# 1表示启用
+		# 2表示不启用
+		# 默认值为1
+		enabled: 1,
 		# 是否打印到控制台
 	  	# 0表示不打印
 	  	# 1表示打印
@@ -60,6 +66,8 @@ $ go get gopkg.in/alog.v1
 	  	# 2表示指定Tag配置输出
 	  	# 3表示指定Level配置输出
 	  	rule: 1,
+	  	# 日志级别
+		level: 1,
 	  	# 输出日志文件信息
 	  	# 0表示不输出
 	  	# 1表示输出

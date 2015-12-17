@@ -7,7 +7,7 @@
 		}
 	},
 	global: {
-	  	enabled: 1,print: 0,rule: 1,showfile: 0,caller: 5,interval: 1,target: "file_global",
+	  	enabled: 1,print: 0,rule: 1,level: 1,showfile: 0,caller: 5,interval: 1,target: "file_global",
 	  	buffer: {engine: 1,target: "redis_buffer"}
 	},
 	tags: [{
