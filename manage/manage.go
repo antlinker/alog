@@ -258,6 +258,9 @@ func (lm *_LogManage) store() {
 		var errs []error
 		targets := lm.storeTargets(item)
 		l := len(targets)
+		if l == 0 {
+			continue
+		}
 		mux := new(sync.Mutex)
 		wg := new(sync.WaitGroup)
 		wg.Add(l)
