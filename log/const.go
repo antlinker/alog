@@ -27,6 +27,9 @@ const (
 
 	// DefaultElasticURL ElasticSearch默认节点
 	DefaultElasticURL = "http://127.0.0.1:9200"
+
+	// DefaultMongoURL 指定MongoDB的默认链接地址
+	DefaultMongoURL = "mongodb://127.0.0.1:27017"
 )
 
 // LogRule 日志规则

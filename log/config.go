@@ -126,6 +126,8 @@ type StoreConfig struct {
 	File map[string]FileConfig `json:"file" yaml:"file"`
 	// Elastic ElasticSearch存储配置
 	Elastic map[string]ElasticConfig `json:"elastic" yaml:"elastic"`
+	// Mongo MongoDB存储配置
+	Mongo map[string]MongoConfig `json:"mongo" yaml:"mongo"`
 }
 
 // RedisConfig redis配置
@@ -188,4 +190,29 @@ type ElasticConfig struct {
 	// Tag 标签
 	// 默认值为ALogs
 	TypeTmpl string `json:"type" yaml:"type"`
+}
+
+// MongoConfig 提供MongoDB持久化存储
+type MongoConfig struct {
+	// URL 指定MongoDB的链接地址
+	// 默认值为mongodb://127.0.0.1:27017
+	URL string `json:"url" yaml:"url"`
+	// DBTmpl 存储数据库名称模板
+	// 模板字段说明：
+	// Year 年份
+	// Month 月份
+	// Day 天数
+	// Level 日志级别
+	// Tag 标签
+	// 默认值为alog
+	DBTmpl string `json:"db" yaml:"db"`
+	// CollectionTmpl 存储集合名称模板
+	// 模板字段说明：
+	// Year 年份
+	// Month 月份
+	// Day 天数
+	// Level 日志级别
+	// Tag 标签
+	// 默认值为{{.Year}}{{.Month}}{{.Day}}
+	CollectionTmpl string `json:"collection" yaml:"collection"`
 }

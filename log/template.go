@@ -30,4 +30,9 @@ const (
 	DefaultElasticIndexTmpl = `{{.Year}}.{{.Month}}.{{.Day}}`
 	// DefaultElasticTypeTmpl ElasticSearch文档类型名称模板
 	DefaultElasticTypeTmpl = `ALogs`
+
+	// DefaultMongoDBTmpl MongoDB数据库名称模板
+	DefaultMongoDBTmpl = `alog`
+	// DefaultMongoCollectionTmpl MongoDB集合名称模板
+	DefaultMongoCollectionTmpl = `{{.Year}}{{.Month}}{{.Day}}`
 )

@@ -1,5 +1,11 @@
 # HISTORY
 
+## v1.1.0
+
+* 增加针对`ElasticSearch`的持久化存储
+* 增加针对`MongoDB`的持久化存储
+* 优化一些实现及错误处理
+
 ## v1.0.6
 
 * 针对`Global`增加`Level`配置

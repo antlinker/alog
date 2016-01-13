@@ -171,6 +171,32 @@
 				# 默认值为ALogs
 				type: "ALogs"
 			}
+		},
+		# MongoDB存储
+		mongo: {
+			mongo_global: {
+				# 指定MongoDB的链接地址
+				# 默认值为mongodb://127.0.0.1:27017
+				url: "mongodb://127.0.0.1:27017",
+				# 存储数据库名称模板
+				# 模板字段说明：
+				# Year 年份
+				# Month 月份
+				# Day 天数
+				# Level 日志级别
+				# Tag 标签
+				# 默认值为alog
+				db: "alog",
+				# 存储集合名称模板
+				# 模板字段说明：
+				# Year 年份
+				# Month 月份
+				# Day 天数
+				# Level 日志级别
+				# Tag 标签
+				# 默认值为{{.Year}}{{.Month}}{{.Day}}
+				collection: "{{.Year}}{{.Month}}{{.Day}}"
+			}
 		}
 	}
 }

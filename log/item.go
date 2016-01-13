@@ -14,6 +14,30 @@ type LogItem struct {
 	File    LogFile   `json:",omitempty"` // File 发生日志的文件
 }
 
+// ToMap 将LogItem转换为字典值
+func (lt *LogItem) ToMap() map[string]interface{} {
+	data := map[string]interface{}{
+		"ID":      lt.ID,
+		"Time":    lt.Time,
+		"Level":   lt.Level.ToString(),
+		"Tag":     lt.Tag,
+		"Message": lt.Message,
+	}
+	if v := lt.File.Name; v != "" {
+		data["FileName"] = v
+	}
+	if v := lt.File.ShortName; v != "" {
+		data["FileName"] = v
+	}
+	if v := lt.File.FuncName; v != "" {
+		data["FileFuncName"] = v
+	}
+	if v := lt.File.Line; v != 0 {
+		data["FileLine"] = v
+	}
+	return data
+}
+
 // LogTag 日志标签
 type LogTag string
 

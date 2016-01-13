@@ -49,6 +49,11 @@ func NewLogManage(config *log.LogConfig) log.LogManage {
 			manageStore[k] = store.NewElasticStore(v)
 		}
 	}
+	if mongoStore := config.Store.Mongo; mongoStore != nil {
+		for k, v := range mongoStore {
+			manageStore[k] = store.NewMongoStore(v)
+		}
+	}
 	manage.Store = manageStore
 
 	if config.Global.IsEnabled == 1 {

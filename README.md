@@ -73,7 +73,7 @@ $ go get gopkg.in/alog.v1
 	  	# 1表示输出
 	  	showfile: 0,
 	  	# 文件信息调用层级
-	  	# 默认为5当前调用)
+	  	# 默认为5(当前调用)
 	  	caller: 5,
 	  	# 读取缓冲区时间间隔（以秒为单位）
 	  	interval: 1,
@@ -161,6 +161,58 @@ $ go get gopkg.in/alog.v1
 		        # 字段说明同上
 		        time: "{{.Year}}-{{.Month}}-{{.Day}} {{.Hour}}:{{.Minute}}:{{.Second}}.{{.MilliSecond}}"
 		      }
+			}
+		},
+		# elasticsearch存储
+		elastic: {
+			elastic_global: {
+				# 指定ElasticSearch的请求节点
+				# 默认值为http://127.0.0.1:9200
+				url: "http://127.0.0.1:9200",
+				# 索引模板
+				# 模板字段说明：
+				# Year 年份
+				# Month 月份
+				# Day 天数
+				# Level 日志级别
+				# Tag 标签
+				# 默认值为{{.Year}}.{{.Month}}.{{.Day}}
+				index: "{{.Year}}.{{.Month}}.{{.Day}}",
+				# 文档类型模板
+				# 模板字段说明：
+				# Year 年份
+				# Month 月份
+				# Day 天数
+				# Level 日志级别
+				# Tag 标签
+				# 默认值为ALogs
+				type: "ALogs"
+			}
+		},
+		# MongoDB存储
+		mongo: {
+			mongo_global: {
+				# 指定MongoDB的链接地址
+				# 默认值为mongodb://127.0.0.1:27017
+				url: "mongodb://127.0.0.1:27017",
+				# 存储数据库名称模板
+				# 模板字段说明：
+				# Year 年份
+				# Month 月份
+				# Day 天数
+				# Level 日志级别
+				# Tag 标签
+				# 默认值为alog
+				db: "alog",
+				# 存储集合名称模板
+				# 模板字段说明：
+				# Year 年份
+				# Month 月份
+				# Day 天数
+				# Level 日志级别
+				# Tag 标签
+				# 默认值为{{.Year}}{{.Month}}{{.Day}}
+				collection: "{{.Year}}{{.Month}}{{.Day}}"
 			}
 		}
 	}
