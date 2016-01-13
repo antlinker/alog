@@ -17,7 +17,7 @@
 		      filename: "{{.Year}}{{.Month}}{{.Day}}.log",
 		      filesize: 2048,
 		      item: {
-        		tmpl: '{{.ID}} {{.Time}} {{.Level}} {{.Tag}} "{{.ShortName}} {{.FileLine}} {{.FileFuncName}}" {{.Message}}',
+        		tmpl: '{{.Time}} {{.Level}} {{.Tag}} {{.Message}}',
 		        time: "{{.Year}}-{{.Month}}-{{.Day}} {{.Hour}}:{{.Minute}}:{{.Second}}.{{.MilliSecond}}"
 		      }
 			}

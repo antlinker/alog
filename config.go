@@ -29,31 +29,31 @@ func parseConfig(config interface{}) (*log.LogConfig, error) {
 
 // 加载配置文件默认参数
 func loadDefaultConfig(config *log.LogConfig) {
-	if (*config).Global.IsEnabled == 0 {
-		(*config).Global.IsEnabled = log.DefaultEnabled
+	if config.Global.IsEnabled == 0 {
+		config.Global.IsEnabled = log.DefaultEnabled
 	}
-	if (*config).Console.Item.Tmpl == "" {
-		(*config).Console.Item.Tmpl = log.DefaultConsoleTmpl
+	if config.Console.Item.Tmpl == "" {
+		config.Console.Item.Tmpl = log.DefaultConsoleTmpl
 	}
-	if (*config).Console.Item.TimeTmpl == "" {
-		(*config).Console.Item.TimeTmpl = log.DefaultConsoleTimeTmpl
+	if config.Console.Item.TimeTmpl == "" {
+		config.Console.Item.TimeTmpl = log.DefaultConsoleTimeTmpl
 	}
-	if (*config).Global.Interval == 0 {
-		(*config).Global.Interval = log.DefaultInterval
+	if config.Global.Interval == 0 {
+		config.Global.Interval = log.DefaultInterval
 	}
-	if (*config).Global.Buffer.Engine == 0 {
-		(*config).Global.Buffer.Engine = log.MEMORY_BUFFER
+	if config.Global.Buffer.Engine == 0 {
+		config.Global.Buffer.Engine = log.MEMORY_BUFFER
 	}
-	if (*config).Global.TargetStore == "" {
-		(*config).Global.TargetStore = log.DefaultGlobalKey
+	if config.Global.TargetStore == "" {
+		config.Global.TargetStore = log.DefaultGlobalKey
 	}
-	if (*config).Store.File == nil {
-		(*config).Store.File = map[string]log.FileConfig{
+	if config.Store.File == nil {
+		config.Store.File = map[string]log.FileConfig{
 			log.DefaultGlobalKey: log.FileConfig{},
 		}
 	}
-	if (*config).Global.FileCaller == 0 {
-		(*config).Global.FileCaller = log.DefaultFileCaller
+	if config.Global.FileCaller == 0 {
+		config.Global.FileCaller = log.DefaultFileCaller
 	}
 }
 

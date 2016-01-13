@@ -24,6 +24,9 @@ const (
 
 	// DefaultFileCaller 默认输出文件信息调用层级
 	DefaultFileCaller = 5
+
+	// DefaultElasticURL ElasticSearch默认节点
+	DefaultElasticURL = "http://127.0.0.1:9200"
 )
 
 // LogRule 日志规则

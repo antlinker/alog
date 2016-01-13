@@ -124,6 +124,8 @@ type StoreConfig struct {
 	Redis map[string]RedisConfig `json:"redis" yaml:"redis"`
 	// File 文件存储配置
 	File map[string]FileConfig `json:"file" yaml:"file"`
+	// Elastic ElasticSearch存储配置
+	Elastic map[string]ElasticConfig `json:"elastic" yaml:"elastic"`
 }
 
 // RedisConfig redis配置
@@ -161,4 +163,29 @@ type FileConfig struct {
 	// time:{{.Year}}-{{.Month}}-{{.Day}} {{.Hour}}:{{.Minute}}:{{.Second}}.{{.MilliSecond}}
 	// tmpl:{{.ID}} {{.Time}} {{.Level}} {{.Tag}} "{{.FileName}} {{.FileFuncName}} {{.FileLine}}" {{.Message}}
 	Item LogItemConfig `json:"item" yaml:"item"`
+}
+
+// ElasticConfig ElasticSearch持久化存储
+type ElasticConfig struct {
+	// URL 指定ElasticSearch的请求节点
+	// 默认值为http://127.0.0.1:9200
+	URL string `json:"url" yaml:"url"`
+	// IndexTmpl 索引模板
+	// 模板字段说明：
+	// Year 年份
+	// Month 月份
+	// Day 天数
+	// Level 日志级别
+	// Tag 标签
+	// 默认值为{{.Year}}.{{.Month}}.{{.Day}}
+	IndexTmpl string `json:"index" yaml:"index"`
+	// TypeTmpl 文档类型模板
+	// 模板字段说明：
+	// Year 年份
+	// Month 月份
+	// Day 天数
+	// Level 日志级别
+	// Tag 标签
+	// 默认值为ALogs
+	TypeTmpl string `json:"type" yaml:"type"`
 }

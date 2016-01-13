@@ -73,7 +73,7 @@ func (fs *FileStore) fileName(item *log.LogItem) string {
 		number     int
 		filterFile []os.FileInfo
 	)
-	fName := log.ParseFileName(fs.config.NameTmpl, item)
+	fName := log.ParseName(fs.config.NameTmpl, item)
 	ext := filepath.Ext(fName)
 	fName = strings.TrimSuffix(fName, ext)
 	root := fs.config.Path
@@ -131,12 +131,12 @@ func (fs *FileStore) Store(item *log.LogItem) error {
 		return fmt.Errorf("The file name is invalid.")
 	}
 	fileName = filepath.Join(fs.config.Path, fileName)
-	logInfo := log.ParseLogItem(fs.config.MsgTmpl, fs.config.TimeTmpl, item)
 	file, err := os.OpenFile(fileName, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0660)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
+	logInfo := log.ParseLogItem(fs.config.MsgTmpl, fs.config.TimeTmpl, item)
 	_, err = file.WriteString(logInfo)
 	return err
 }

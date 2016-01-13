@@ -16,27 +16,21 @@ import (
 	"gopkg.in/alog.v1/utils"
 )
 
-var (
-	// 日志项标识
-	_GLOGID uint64
-)
-
 // NewLogManage 创建新的LogManage实例
 func NewLogManage(config *log.LogConfig) log.LogManage {
-	cfg := *config
 	manage := &_LogManage{
 		Config: config,
 	}
 	manage.Template = map[log.TmplKey]*template.Template{
-		log.TmplConsole:     template.Must(template.New("").Parse(cfg.Console.Item.Tmpl)),
-		log.TmplConsoleTime: template.Must(template.New("").Parse(cfg.Console.Item.TimeTmpl)),
+		log.TmplConsole:     template.Must(template.New("").Parse(config.Console.Item.Tmpl)),
+		log.TmplConsoleTime: template.Must(template.New("").Parse(config.Console.Item.TimeTmpl)),
 	}
-	switch cfg.Global.Buffer.Engine {
+	switch config.Global.Buffer.Engine {
 	case log.REDIS_BUFFER:
 		var redisConfig log.RedisConfig
-		redisStore := cfg.Store.Redis
+		redisStore := config.Store.Redis
 		if redisStore != nil {
-			if v, ok := redisStore[cfg.Global.Buffer.TargetStore]; ok {
+			if v, ok := redisStore[config.Global.Buffer.TargetStore]; ok {
 				redisConfig = v
 			}
 		}
@@ -45,14 +39,19 @@ func NewLogManage(config *log.LogConfig) log.LogManage {
 		manage.Buffer = buffer.NewMemoryBuffer()
 	}
 	manageStore := make(map[string]log.LogStore)
-	if fileStore := cfg.Store.File; fileStore != nil {
-		for fk, fv := range fileStore {
-			manageStore[fk] = store.NewFileStore(fv)
+	if fileStore := config.Store.File; fileStore != nil {
+		for k, v := range fileStore {
+			manageStore[k] = store.NewFileStore(v)
+		}
+	}
+	if elasticStore := config.Store.Elastic; elasticStore != nil {
+		for k, v := range elasticStore {
+			manageStore[k] = store.NewElasticStore(v)
 		}
 	}
 	manage.Store = manageStore
 
-	if cfg.Global.IsEnabled == 1 {
+	if config.Global.IsEnabled == 1 {
 		go manage.execStore()
 	}
 
@@ -61,12 +60,13 @@ func NewLogManage(config *log.LogConfig) log.LogManage {
 
 // _LogManage
 type _LogManage struct {
-	locker   sync.RWMutex
-	total    int64
-	Config   *log.LogConfig
-	Template map[log.TmplKey]*template.Template
-	Buffer   log.LogBuffer
-	Store    map[string]log.LogStore
+	sync.RWMutex
+	gID        uint64
+	storeTotal int64
+	Config     *log.LogConfig
+	Template   map[log.TmplKey]*template.Template
+	Buffer     log.LogBuffer
+	Store      map[string]log.LogStore
 }
 
 func (lm *_LogManage) Write(level log.LogLevel, tag log.LogTag, v ...interface{}) {
@@ -95,14 +95,11 @@ func (lm *_LogManage) writeConsole(level log.LogLevel, tag log.LogTag, msg strin
 }
 
 func (lm *_LogManage) TotalNum() int64 {
-	lm.locker.RLock()
-	defer lm.locker.RUnlock()
-	return lm.total
+	return lm.storeTotal
 }
 
 func (lm *_LogManage) writeMsg(level log.LogLevel, tag log.LogTag, msg string) {
 	item := lm.logItem(level, tag, msg)
-	item.ID = atomic.AddUint64(&_GLOGID, 1)
 	if lm.Config.Global.ShowFile > 0 {
 		item.File = lm.file()
 	}
@@ -114,6 +111,7 @@ func (lm *_LogManage) writeMsg(level log.LogLevel, tag log.LogTag, msg string) {
 
 func (lm *_LogManage) logItem(level log.LogLevel, tag log.LogTag, msg string) log.LogItem {
 	item := log.LogItem{
+		ID:      atomic.AddUint64(&lm.gID, 1),
 		Level:   level,
 		Time:    time.Now(),
 		Tag:     tag,
@@ -227,9 +225,14 @@ func (lm *_LogManage) console(item *log.LogItem) {
 	}
 }
 
+func (lm *_LogManage) systemLog(tag log.LogLevel, msg string) {
+	item := lm.logItem(tag, "SYSTEM", msg)
+	lm.stdout(log.DefaultSystemTmpl, log.DefaultConsoleTimeTmpl, &item)
+}
+
 func (lm *_LogManage) stdout(tmpl, timetmpl interface{}, item *log.LogItem) {
-	buf := log.ParseLogItemToBuffer(tmpl, timetmpl, item)
-	fmt.Fprintln(os.Stdout, buf.String())
+	info := log.ParseLogItem(tmpl, timetmpl, item)
+	os.Stdout.WriteString(info)
 }
 
 func (lm *_LogManage) execStore() {
@@ -241,12 +244,6 @@ func (lm *_LogManage) execStore() {
 }
 
 func (lm *_LogManage) store() {
-	defer func() {
-		if err := recover(); err != nil {
-			item := lm.logItem(log.FATAL, "SYSTEM", fmt.Sprint(err))
-			lm.stdout(log.DefaultSystemTmpl, log.DefaultConsoleTimeTmpl, &item)
-		}
-	}()
 	for {
 		item, err := lm.Buffer.Pop()
 		if err != nil {
@@ -255,25 +252,18 @@ func (lm *_LogManage) store() {
 		if item == nil {
 			break
 		}
-		var errs []error
 		targets := lm.storeTargets(item)
 		l := len(targets)
 		if l == 0 {
 			continue
 		}
-		mux := new(sync.Mutex)
 		wg := new(sync.WaitGroup)
 		wg.Add(l)
 		for i, l := 0, len(targets); i < l; i++ {
-			go lm.writeStore(wg, mux, &errs, targets[i], item)
+			go lm.writeStore(wg, targets[i], item)
 		}
 		wg.Wait()
-		if len(errs) == l {
-			panic("Write store error.")
-		}
-		lm.locker.Lock()
-		lm.total++
-		lm.locker.Unlock()
+		atomic.AddInt64(&lm.storeTotal, 1)
 	}
 }
 
@@ -321,19 +311,14 @@ func (lm *_LogManage) storeTargets(item *log.LogItem) (targets []string) {
 	return
 }
 
-func (lm *_LogManage) writeStore(wg *sync.WaitGroup, mux *sync.Mutex, errs *[]error, target string, item *log.LogItem) {
+func (lm *_LogManage) writeStore(wg *sync.WaitGroup, target string, item *log.LogItem) {
 	defer wg.Done()
 	store, ok := lm.Store[target]
 	if !ok {
-		mux.Lock()
-		*errs = append(*errs, fmt.Errorf("Unknown store."))
-		mux.Unlock()
 		return
 	}
 	err := store.Store(item)
 	if err != nil {
-		mux.Lock()
-		*errs = append(*errs, err)
-		mux.Unlock()
+		lm.systemLog(log.FATAL, fmt.Sprintf("Write store error:%s", err.Error()))
 	}
 }

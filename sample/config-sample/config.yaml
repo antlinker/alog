@@ -145,6 +145,32 @@
 		        time: "{{.Year}}-{{.Month}}-{{.Day}} {{.Hour}}:{{.Minute}}:{{.Second}}.{{.MilliSecond}}"
 		      }
 			}
+		},
+		# elasticsearch存储
+		elastic: {
+			elastic_global: {
+				# 指定ElasticSearch的请求节点
+				# 默认值为http://127.0.0.1:9200
+				url: "http://127.0.0.1:9200",
+				# 索引模板
+				# 模板字段说明：
+				# Year 年份
+				# Month 月份
+				# Day 天数
+				# Level 日志级别
+				# Tag 标签
+				# 默认值为{{.Year}}.{{.Month}}.{{.Day}}
+				index: "{{.Year}}.{{.Month}}.{{.Day}}",
+				# 文档类型模板
+				# 模板字段说明：
+				# Year 年份
+				# Month 月份
+				# Day 天数
+				# Level 日志级别
+				# Tag 标签
+				# 默认值为ALogs
+				type: "ALogs"
+			}
 		}
 	}
 }

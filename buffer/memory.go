@@ -16,25 +16,27 @@ func NewMemoryBuffer() log.LogBuffer {
 
 // _MemoryBuffer 内存缓冲区
 type _MemoryBuffer struct {
-	lists  *list.List
-	locker sync.Mutex
+	sync.RWMutex
+	lists *list.List
 }
 
 func (mb *_MemoryBuffer) Push(item log.LogItem) error {
-	mb.locker.Lock()
-	defer mb.locker.Unlock()
+	mb.Lock()
 	mb.lists.PushBack(item)
+	mb.Unlock()
 	return nil
 }
 
 func (mb *_MemoryBuffer) Pop() (*log.LogItem, error) {
-	mb.locker.Lock()
-	defer mb.locker.Unlock()
+	mb.Lock()
 	ele := mb.lists.Front()
 	if ele == nil || ele.Value == nil {
+		mb.Unlock()
 		return nil, nil
 	}
-	item := ele.Value.(log.LogItem)
+	v := ele.Value
 	mb.lists.Remove(ele)
+	mb.Unlock()
+	item := v.(log.LogItem)
 	return &item, nil
 }

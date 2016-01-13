@@ -43,13 +43,7 @@ func (rb *_RedisBuffer) Push(item log.LogItem) error {
 	key := fmt.Sprintf("%d_%d", item.Time.Unix(), item.ID)
 	val := rb.encode(item)
 	rb.wRlient.Set(key, val, 0)
-	// if err := itemResult.Err(); err != nil {
-	// 	return err
-	// }
 	rb.wRlient.RPush(_LISTKEY, key)
-	// if err := listResult.Err(); err != nil {
-	// 	return err
-	// }
 	_, err := rb.wRlient.Exec()
 	return err
 }

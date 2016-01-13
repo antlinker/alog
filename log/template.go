@@ -25,4 +25,9 @@ const (
 
 	// DefaultFileNameTmpl 默认存储日志文件名模板
 	DefaultFileNameTmpl = `{{.Year}}{{.Month}}{{.Day}}.log`
+
+	// DefaultElasticIndexTmpl ElasticSearch文档索引名称模板
+	DefaultElasticIndexTmpl = `{{.Year}}.{{.Month}}.{{.Day}}`
+	// DefaultElasticTypeTmpl ElasticSearch文档类型名称模板
+	DefaultElasticTypeTmpl = `ALogs`
 )
