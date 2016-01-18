@@ -1,47 +1,18 @@
 package alog
 
-import (
-	"fmt"
-	"os"
-
-	"gopkg.in/alog.v1/log"
-	"gopkg.in/alog.v1/manage"
-)
+import "gopkg.in/alog.v1/log"
 
 var (
 	// 提供全局的ALog
-	GALog    *ALog
-	_GConfig *log.LogConfig
+	GALog *ALog
 )
 
 // RegisterAlog 注册并初始化ALog
 // configs 配置信息:
 // 配置文件方式，包含yaml,json两种方式
-// 动态配置LogConfig
-func RegisterAlog(configs ...interface{}) {
-	defer func() {
-		if err := recover(); err != nil {
-			fmt.Println("===> [ALog]Initialization error:", err)
-			os.Exit(-1)
-		}
-	}()
-	var config *log.LogConfig
-	if len(configs) > 0 {
-		cfg, err := parseConfig(configs[0])
-		if err != nil {
-			panic(err)
-		}
-		config = cfg
-	} else {
-		config = new(log.LogConfig)
-	}
-	loadDefaultConfig(config)
-	_GConfig = config
-	GALog = &ALog{
-		manage: manage.NewLogManage(config),
-		config: config,
-		tag:    log.DefaultTag,
-	}
+func RegisterAlog(configs ...string) {
+	GALog = NewALog(configs...)
+	GALog.SetFileCaller(GALog.GetConfig().Global.FileCaller + 1)
 }
 
 // SetLogTag 设置日志标签

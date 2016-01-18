@@ -32,6 +32,7 @@ type LogItemConfig struct {
 	// Tag 标签
 	// Message 日志明细
 	// FileName 文件名
+	// ShortName 短文件名
 	// FileFuncName 函数名
 	// FileLine 文件行
 	Tmpl string `json:"tmpl" yaml:"tmpl"`
@@ -55,7 +56,9 @@ type GlobalConfig struct {
 	// 2表示不启用
 	// 默认值为1
 	IsEnabled int `yaml:"enabled" json:"enabled"`
-	// IsPrint 是否控制台打印
+	// IsPrint 是否打印到控制台
+	// 1表示打印
+	// 2表示不打印
 	IsPrint int `yaml:"print" json:"print"`
 	// Rule 日志输出规则
 	// 参数说明：
@@ -68,14 +71,14 @@ type GlobalConfig struct {
 	// Level 日志级别
 	Level LogLevel `json:"level" yaml:"level"`
 	// ShowFile 是否输出日志文件信息，包括：文件名、行数、函数名
-	// 0表示不输出
 	// 1表示输出
+	// 2表示不输出
 	ShowFile int `json:"showfile" yaml:"showfile"`
 	// FileCaller 文件信息调用层级
-	// 默认为4(当前调用)
+	// 默认为5(当前调用)
 	FileCaller int `json:"caller" yaml:"caller"`
 	// Interval 读取缓冲区时间间隔（以秒为单位）
-	// 默认为2秒
+	// 默认为1秒
 	Interval int `json:"interval" yaml:"interval"`
 	// Buffer 缓冲区配置
 	Buffer BufferConfig `json:"buffer" yaml:"buffer"`

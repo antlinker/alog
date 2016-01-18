@@ -2,8 +2,8 @@
 	# 控制台输出配置
 	console: {
 		# 输出日志级别（1表示Debug,2表示Info,3表示Warn,4表示Error,5表示Fatal）
-  		# 0表示输出所有级别
-		level: 0,
+  		# 1表示输出Debug及以上所有级别的日志
+		level: 1,
 		# 日志项模板
 		item: {
 			# 项模板
@@ -17,7 +17,7 @@
 		    # ShortName 短文件名
 		    # FileFuncName 函数名
 		    # FileLine 文件行
-			tmpl: "[{{.ID}} {{.Time}} {{.Level}} {{.Tag}}] {{.Message}}",
+			tmpl: "[{{.Time}}｜{{.Level}}｜{{.Tag}}]{{.ShortName}}:{{.FileLine}}:{{.Message}}",
 			# 时间模板
 		    # 模板字段说明：
 		    # Year 年份
@@ -39,22 +39,22 @@
 		# 默认值为1
 		enabled: 1,
 		# 是否打印到控制台
-	  	# 0表示不打印
 	  	# 1表示打印
-	  	print: 0,
+	  	# 2表示不打印
+	  	print: 2,
 	  	# 日志输出规则
 	  	# 参数说明：
 	  	# 0表示所有配置输出
 	  	# 1表示指定Global配置输出
 	  	# 2表示指定Tag配置输出
 	  	# 3表示指定Level配置输出
-	  	rule: 1,
+	  	rule: 0,
 	  	# 日志级别
 		level: 1,
-	  	# 输出日志文件信息
-	  	# 0表示不输出
+	  	# 输出文件信息
 	  	# 1表示输出
-	  	showfile: 0,
+	  	# 2表示不输出
+	  	showfile: 1,
 	  	# 文件信息调用层级
 	  	# 默认为5(当前调用)
 	  	caller: 5,
@@ -80,11 +80,11 @@
   		# 配置
   		config: {
   			# 是否打印到控制台
-		    # 0表示不打印
 		    # 1表示打印
-		    print: 0,
+	  		# 2表示不打印
+		    print: 2,
 		    # 日志级别
-		    level: 0,
+		    level: 1,
 		    # 目标存储
 		    # 指向store中定义的存储配置
 		    target: ""
@@ -97,9 +97,9 @@
   		# 配置
   		config: {
   			# 是否打印到控制台
-		    # 0表示不打印
 		    # 1表示打印
-		    print: 0,
+	  		# 2表示不打印
+		    print: 2,
 		    # 目标存储
 		    # 指向store中定义的存储配置
 		    target: ""

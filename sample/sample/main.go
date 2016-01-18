@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	alog.RegisterAlog("config.yaml")
+	alog.RegisterAlog()
 	alog.SetLogTag("Sample")
 	alog.Debug("Debug info...")
 	alog.DebugC("Debug console info...")

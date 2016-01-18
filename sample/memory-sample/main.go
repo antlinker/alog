@@ -31,7 +31,7 @@ func main() {
 	_GCHComplete = make(chan time.Time, 1)
 	startTime := time.Now()
 	alog.RegisterAlog("config.yaml")
-	alog.GALog.SetLogTag("TEST")
+	alog.GALog.SetLogTag("MEMORY")
 	ticker := time.NewTicker(time.Second)
 	go output(startTime, ticker)
 	go func() {

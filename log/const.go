@@ -16,11 +16,20 @@ const (
 	// DefaultFilePath 默认日志文件存储路径
 	DefaultFilePath = "logs"
 
-	// DefaultFileSize 默认单个日志文件大小为512KB
-	DefaultFileSize = 512
+	// DefaultFileSize 默认单个日志文件大小为2048KB
+	DefaultFileSize = 2048
 
-	// DefaultInterval 默认存储写入时间间隔
-	DefaultInterval = 2
+	// DefaultPrint 默认不输出日志到控制台
+	DefaultPrint = 2
+
+	// DefaultLogLevel 默认日志级别
+	DefaultLogLevel = DEBUG
+
+	// DefaultInterval 默认写入时间间隔
+	DefaultInterval = 1
+
+	// DefaultShowFile 默认输出文件信息
+	DefaultShowFile = 1
 
 	// DefaultFileCaller 默认输出文件信息调用层级
 	DefaultFileCaller = 5

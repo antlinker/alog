@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"gopkg.in/alog.v1/utils"
+
 	"gopkg.in/alog.v1/log"
 	"gopkg.in/alog.v1/manage"
 )
@@ -16,32 +18,28 @@ type ALog struct {
 }
 
 // NewALog 获取ALog实例
-func NewALog(configs ...interface{}) *ALog {
+// configs 配置文件路径
+func NewALog(configs ...string) *ALog {
 	defer func() {
 		if err := recover(); err != nil {
 			fmt.Println("===> [ALog]Initialization error:", err)
 			os.Exit(-1)
 		}
 	}()
-	var config *log.LogConfig
+	config := loadDefaultConfig()
 	if len(configs) > 0 {
-		cfg, err := parseConfig(configs[0])
+		err := utils.NewConfig(configs[0]).Read(config)
 		if err != nil {
 			panic(err)
 		}
-		config = cfg
-	} else if _GConfig != nil {
-		cfg := *_GConfig
-		config = &cfg
-	} else {
-		config = defaultConfig()
+	} else if gLg := GALog; gLg != nil {
+		config = &(*(gLg.GetConfig()))
 	}
-	alg := &ALog{
+	return &ALog{
 		config: config,
 		manage: manage.NewLogManage(config),
 		tag:    log.DefaultTag,
 	}
-	return alg
 }
 
 // SetLogTag 设置LogTag
@@ -49,14 +47,23 @@ func (a *ALog) SetLogTag(tag string) {
 	a.tag = log.LogTag(tag)
 }
 
+// SetShowFile 设置输出文件信息
+func (a *ALog) SetShowFile(v bool) {
+	show := 2
+	if v {
+		show = 1
+	}
+	a.config.Global.ShowFile = show
+}
+
 // SetFileCaller 设置文件调用层次
 func (a *ALog) SetFileCaller(caller int) {
-	(*(a.config)).Global.FileCaller = caller
+	a.config.Global.FileCaller = caller
 }
 
 // SetRule 设置输出规则
 func (a *ALog) SetRule(rule log.LogRule) {
-	(*(a.config)).Global.Rule = rule
+	a.config.Global.Rule = rule
 }
 
 // GetConfig 获取配置文件信息
@@ -64,7 +71,7 @@ func (a *ALog) GetConfig() *log.LogConfig {
 	return a.config
 }
 
-// GetWriteNum 获取写入日志条数
+// GetWriteNum 获取写入持久化日志条数
 func (a *ALog) GetWriteNum() int64 {
 	return a.manage.TotalNum()
 }

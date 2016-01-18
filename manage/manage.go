@@ -105,9 +105,6 @@ func (lm *_LogManage) TotalNum() int64 {
 
 func (lm *_LogManage) writeMsg(level log.LogLevel, tag log.LogTag, msg string) {
 	item := lm.logItem(level, tag, msg)
-	if lm.Config.Global.ShowFile > 0 {
-		item.File = lm.file()
-	}
 	if lm.isPrint(&item) {
 		lm.console(&item)
 	}
@@ -121,6 +118,9 @@ func (lm *_LogManage) logItem(level log.LogLevel, tag log.LogTag, msg string) lo
 		Time:    time.Now(),
 		Tag:     tag,
 		Message: msg,
+	}
+	if lm.Config.Global.ShowFile == 1 {
+		item.File = lm.file()
 	}
 	return item
 }
@@ -145,11 +145,11 @@ func (lm *_LogManage) isPrint(item *log.LogItem) bool {
 	switch lm.Config.Global.Rule {
 	case log.AlwaysRule:
 		isPrint = lm.isEitherTrue(item, func(lm *_LogManage, item *log.LogItem) bool {
-			return lm.Config.Global.IsPrint > 0
+			return lm.Config.Global.IsPrint == 1
 		}, func(lm *_LogManage, item *log.LogItem) bool {
 			var v bool
 			lm.tags(item, func(t log.TagConfig) bool {
-				if t.Config.IsPrint > 0 {
+				if t.Config.IsPrint == 1 {
 					v = true
 					return true
 				}
@@ -159,7 +159,7 @@ func (lm *_LogManage) isPrint(item *log.LogItem) bool {
 		}, func(lm *_LogManage, item *log.LogItem) bool {
 			var v bool
 			lm.levels(item, func(l log.LevelConfig) bool {
-				if l.Config.IsPrint > 0 {
+				if l.Config.IsPrint == 1 {
 					v = true
 					return true
 				}
@@ -168,10 +168,10 @@ func (lm *_LogManage) isPrint(item *log.LogItem) bool {
 			return v
 		})
 	case log.GlobalRule:
-		isPrint = lm.Config.Global.IsPrint > 0
+		isPrint = lm.Config.Global.IsPrint == 1
 	case log.TagRule:
 		lm.tags(item, func(t log.TagConfig) bool {
-			if t.Config.IsPrint > 0 {
+			if t.Config.IsPrint == 1 {
 				isPrint = true
 				return true
 			}
@@ -179,7 +179,7 @@ func (lm *_LogManage) isPrint(item *log.LogItem) bool {
 		})
 	case log.LevelRule:
 		lm.levels(item, func(l log.LevelConfig) bool {
-			if l.Config.IsPrint > 0 {
+			if l.Config.IsPrint == 1 {
 				isPrint = true
 				return true
 			}
