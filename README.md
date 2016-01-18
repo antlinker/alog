@@ -19,8 +19,8 @@ $ go get gopkg.in/alog.v1
 	# 控制台输出配置
 	console: {
 		# 输出日志级别（1表示Debug,2表示Info,3表示Warn,4表示Error,5表示Fatal）
-  		# 0表示输出所有级别
-		level: 0,
+  		# 1表示输出Debug及以上所有级别的日志
+		level: 1,
 		# 日志项模板
 		item: {
 			# 项模板
@@ -34,7 +34,7 @@ $ go get gopkg.in/alog.v1
 		    # ShortName 短文件名
 		    # FileFuncName 函数名
 		    # FileLine 文件行
-			tmpl: "[{{.ID}} {{.Time}} {{.Level}} {{.Tag}}] {{.Message}}",
+			tmpl: "[{{.Time}}｜{{.Level}}｜{{.Tag}}]{{.ShortName}}:{{.FileLine}}:{{.Message}}",
 			# 时间模板
 		    # 模板字段说明：
 		    # Year 年份
@@ -56,22 +56,25 @@ $ go get gopkg.in/alog.v1
 		# 默认值为1
 		enabled: 1,
 		# 是否打印到控制台
-	  	# 0表示不打印
 	  	# 1表示打印
-	  	print: 0,
+	  	# 2表示不打印
+	  	# 默认为不打印
+	  	print: 2,
 	  	# 日志输出规则
 	  	# 参数说明：
 	  	# 0表示所有配置输出
 	  	# 1表示指定Global配置输出
 	  	# 2表示指定Tag配置输出
 	  	# 3表示指定Level配置输出
-	  	rule: 1,
+	  	# 默认为所有配置输出(0)
+	  	rule: 0,
 	  	# 日志级别
 		level: 1,
-	  	# 输出日志文件信息
-	  	# 0表示不输出
+	  	# 输出文件信息
 	  	# 1表示输出
-	  	showfile: 0,
+	  	# 2表示不输出
+	  	# 默认为输出(1)
+	  	showfile: 1,
 	  	# 文件信息调用层级
 	  	# 默认为5(当前调用)
 	  	caller: 5,
@@ -97,11 +100,11 @@ $ go get gopkg.in/alog.v1
   		# 配置
   		config: {
   			# 是否打印到控制台
-		    # 0表示不打印
 		    # 1表示打印
-		    print: 0,
+	  		# 2表示不打印
+		    print: 2,
 		    # 日志级别
-		    level: 0,
+		    level: 1,
 		    # 目标存储
 		    # 指向store中定义的存储配置
 		    target: ""
@@ -114,9 +117,9 @@ $ go get gopkg.in/alog.v1
   		# 配置
   		config: {
   			# 是否打印到控制台
-		    # 0表示不打印
 		    # 1表示打印
-		    print: 0,
+	  		# 2表示不打印
+		    print: 2,
 		    # 目标存储
 		    # 指向store中定义的存储配置
 		    target: ""
@@ -231,7 +234,7 @@ import (
 )
 
 func main() {
-	alog.RegisterAlog("config.yaml")
+	alog.RegisterAlog()
 	alog.SetLogTag("Sample")
 	alog.Debug("Debug info...")
 	alog.DebugC("Debug console info...")
@@ -247,60 +250,24 @@ func main() {
 }
 ```
 
-### config.yaml:
-
-``` yaml
-{
-	console: {
-		level: 1,
-		item: {
-			tmpl: "[{{.ID}} {{.Time}} {{.Level}} {{.Tag}}] {{.Message}}",
-			time: "{{.Hour}}:{{.Minute}}"
-		}
-	},
-	global: {
-	  	print: 1,rule: 1,showfile: 1,caller: 5,interval: 1,target: "file_global",
-	  	buffer: {engine: 1}
-	},
-	store: {
-		file: {
-			file_global: {
-		      filepath: "logs",
-		      filename: "{{.Year}}{{.Month}}{{.Day}}.log",
-		      filesize: 2048,
-		      item: {
-        		tmpl: '{{.ID}} {{.Time}} {{.Level}} {{.Tag}} "{{.ShortName}} {{.FileLine}} {{.FileFuncName}}" {{.Message}}',
-		        time: "{{.Year}}-{{.Month}}-{{.Day}} {{.Hour}}:{{.Minute}}:{{.Second}}.{{.MilliSecond}}"
-		      }
-			}
-		}
-	}
-}
-```
-
 ### Console Output:
 
 ```
-[1 15:26 Debug Sample] Debug info...
-[0 15:26 Debug Sample] Debug console info...
-[2 15:26 Info Sample] Info info...
-[0 15:26 Info Sample] Info console info...
-[3 15:26 Warn Sample] Warn info...
-[0 15:26 Warn Sample] Warn console info...
-[4 15:26 Error Sample] Error info...
-[0 15:26 Error Sample] Error console info...
-[5 15:26 Fatal Sample] Fatal info...
-[0 15:26 Fatal Sample] Fatal console info...
+[13:36:58｜Debug｜Sample]main.go:13:Debug console info...
+[13:36:58｜Info｜Sample]main.go:15:Info console info...
+[13:36:58｜Warn｜Sample]main.go:17:Warn console info...
+[13:36:58｜Error｜Sample]main.go:19:Error console info...
+[13:36:58｜Fatal｜Sample]main.go:21:Fatal console info...
 ```
 
 ### File Output:
 
 ```
-1 2015-12-08 15:26:18.253 Debug Sample "main.go 12 main.main" Debug info...
-2 2015-12-08 15:26:18.254 Info Sample "main.go 14 main.main" Info info...
-3 2015-12-08 15:26:18.254 Warn Sample "main.go 16 main.main" Warn info...
-4 2015-12-08 15:26:18.254 Error Sample "main.go 18 main.main" Error info...
-5 2015-12-08 15:26:18.254 Fatal Sample "main.go 20 main.main" Fatal info...
+2016-01-18 13:38:09.721 Debug Sample "main.go main.main 12" Debug info...
+2016-01-18 13:38:09.721 Info Sample "main.go main.main 14" Info info...
+2016-01-18 13:38:09.721 Warn Sample "main.go main.main 16" Warn info...
+2016-01-18 13:38:09.721 Error Sample "main.go main.main 18" Error info...
+2016-01-18 13:38:09.721 Fatal Sample "main.go main.main 20" Fatal info...
 ```
 
 ## License

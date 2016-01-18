@@ -21,7 +21,7 @@ const (
 	// DefaultSystemTmpl 默认系统控制台输出模板
 	DefaultSystemTmpl = `[{{.Time}} {{.Level}} {{.Tag}}] {{.Message}}`
 	// DefaultMsgTmpl 默认文件存储日志模板
-	DefaultMsgTmpl = `{{.ID}} {{.Time}} {{.Level}} {{.Tag}} "{{.ShortName}} {{.FileFuncName}} {{.FileLine}}" {{.Message}}`
+	DefaultMsgTmpl = `{{.Time}} {{.Level}} {{.Tag}} "{{.ShortName}} {{.FileFuncName}} {{.FileLine}}" {{.Message}}`
 
 	// DefaultFileNameTmpl 默认存储日志文件名模板
 	DefaultFileNameTmpl = `{{.Year}}{{.Month}}{{.Day}}.log`
