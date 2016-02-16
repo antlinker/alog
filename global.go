@@ -12,12 +12,17 @@ var (
 // 配置文件方式，包含yaml,json两种方式
 func RegisterAlog(configs ...string) {
 	GALog = NewALog(configs...)
-	GALog.SetFileCaller(GALog.GetConfig().Global.FileCaller + 1)
+	GALog.SetFileCaller(GALog.GetConfig().Global.FileCaller)
 }
 
 // SetLogTag 设置日志标签
 func SetLogTag(tag string) {
 	GALog.SetLogTag(tag)
+}
+
+// SetEnabled 设置是否启用日志
+func SetEnabled(enabled bool) {
+	GALog.SetEnabled(enabled)
 }
 
 // Debug Debug 消息

@@ -47,6 +47,11 @@ func (a *ALog) SetLogTag(tag string) {
 	a.tag = log.LogTag(tag)
 }
 
+// SetLogLevel 设置日志输出级别
+func (a *ALog) SetLogLevel(level log.LogLevel) {
+	a.config.Global.Level = level
+}
+
 // SetShowFile 设置输出文件信息
 func (a *ALog) SetShowFile(v bool) {
 	show := 2
@@ -64,6 +69,15 @@ func (a *ALog) SetFileCaller(caller int) {
 // SetRule 设置输出规则
 func (a *ALog) SetRule(rule log.LogRule) {
 	a.config.Global.Rule = rule
+}
+
+// SetEnabled 设置是否启用日志
+func (a *ALog) SetEnabled(enabled bool) {
+	v := 2
+	if enabled {
+		v = 1
+	}
+	a.config.Global.IsEnabled = v
 }
 
 // GetConfig 获取配置文件信息

@@ -11,7 +11,7 @@ const (
 	DefaultSystemTag LogTag = "SYSTEM"
 
 	// DefaultGlobalKey 默认Global存储键
-	DefaultGlobalKey = "global"
+	// DefaultGlobalKey = "global"
 
 	// DefaultFilePath 默认日志文件存储路径
 	DefaultFilePath = "logs"
@@ -19,8 +19,8 @@ const (
 	// DefaultFileSize 默认单个日志文件大小为2048KB
 	DefaultFileSize = 2048
 
-	// DefaultPrint 默认不输出日志到控制台
-	DefaultPrint = 2
+	// DefaultPrint 默认输出日志到控制台
+	DefaultPrint = 1
 
 	// DefaultLogLevel 默认日志级别
 	DefaultLogLevel = DEBUG
@@ -32,7 +32,7 @@ const (
 	DefaultShowFile = 1
 
 	// DefaultFileCaller 默认输出文件信息调用层级
-	DefaultFileCaller = 5
+	DefaultFileCaller = 6
 
 	// DefaultElasticURL ElasticSearch默认节点
 	DefaultElasticURL = "http://127.0.0.1:9200"

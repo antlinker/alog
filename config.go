@@ -15,9 +15,9 @@ func loadDefaultConfig() *log.LogConfig {
 	config.Global.Interval = log.DefaultInterval
 	config.Global.ShowFile = log.DefaultShowFile
 	config.Global.FileCaller = log.DefaultFileCaller
-	config.Global.TargetStore = log.DefaultGlobalKey
-	config.Store.File = map[string]log.FileConfig{
-		log.DefaultGlobalKey: log.FileConfig{},
-	}
+	// config.Global.TargetStore = log.DefaultGlobalKey
+	// config.Store.File = map[string]log.FileConfig{
+	// 	log.DefaultGlobalKey: log.FileConfig{},
+	// }
 	return config
 }
