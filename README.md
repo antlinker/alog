@@ -5,12 +5,12 @@
 ## Installation and usage
 
 ``` bash
-$ go get gopkg.in/alog.v1
+$ go get github.com/antlinker/alog
 ```
 
 ## API documentation
 
-* [https://godoc.org/gopkg.in/alog.v1](https://godoc.org/gopkg.in/alog.v1)
+* [https://godoc.org/github.com/antlinker/alog](https://godoc.org/github.com/antlinker/alog)
 
 ## Configuration file
 
@@ -23,7 +23,7 @@ $ go get gopkg.in/alog.v1
 		level: 1,
 		# 日志项模板
 		item: {
-			# 项模板
+				# 项模板
 		    # 模板字段说明：
 		    # ID 唯一标识
 		    # Time 日志发生时间
@@ -59,7 +59,7 @@ $ go get gopkg.in/alog.v1
 	  	# 1表示打印
 	  	# 2表示不打印
 	  	# 默认为不打印
-	  	print: 2,
+	  	print: 1,
 	  	# 日志输出规则
 	  	# 参数说明：
 	  	# 0表示所有配置输出
@@ -69,29 +69,29 @@ $ go get gopkg.in/alog.v1
 	  	# 默认为所有配置输出(0)
 	  	rule: 0,
 	  	# 日志级别
-		level: 1,
+			level: 1,
 	  	# 输出文件信息
 	  	# 1表示输出
 	  	# 2表示不输出
 	  	# 默认为输出(1)
 	  	showfile: 1,
 	  	# 文件信息调用层级
-	  	# 默认为5(当前调用)
-	  	caller: 5,
+	  	# 默认为6(当前调用)
+	  	caller: 6,
 	  	# 读取缓冲区时间间隔（以秒为单位）
 	  	interval: 1,
 	  	# 目标存储
 	  	# 指向store中定义的存储配置
-	  	target: "file_global",
+	  	# target: "file_global",
 	  	# 缓冲区存储
-	  	buffer: {
+	  	# buffer: {
 	  		# 存储引擎
 		    # 1表示内存存储
 		    # 2表示redis存储
-		    engine: 1,
+		    # engine: 1,
 		    # 指向store中定义的存储配置
-		    target: "redis_buffer"
-	  	}
+		    # target: "redis_buffer"
+	  	# }
 	},
 	# 标签配置
 	tags: [{
@@ -230,7 +230,7 @@ package main
 import (
 	"time"
 
-	"gopkg.in/alog.v1"
+	"github.com/antlinker/alog"
 )
 
 func main() {

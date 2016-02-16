@@ -1,7 +1,7 @@
 package main
 
 import (
-	"gopkg.in/alog.v1"
+	"github.com/antlinker/alog"
 )
 
 func main() {

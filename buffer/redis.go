@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"gopkg.in/alog.v1/log"
+	"github.com/antlinker/alog/log"
 	"gopkg.in/redis.v3"
 )
 

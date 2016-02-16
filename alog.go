@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 
-	"gopkg.in/alog.v1/utils"
+	"github.com/antlinker/alog/utils"
 
-	"gopkg.in/alog.v1/log"
-	"gopkg.in/alog.v1/manage"
+	"github.com/antlinker/alog/log"
+	"github.com/antlinker/alog/manage"
 )
 
 // ALog 提供ALog日志模块的输出管理

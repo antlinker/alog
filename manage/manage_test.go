@@ -3,7 +3,7 @@ package manage
 import (
 	"testing"
 
-	"gopkg.in/alog.v1/log"
+	"github.com/antlinker/alog/log"
 )
 
 func TestConsole(t *testing.T) {

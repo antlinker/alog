@@ -7,7 +7,7 @@ import (
 	"strings"
 	"text/template"
 
-	"gopkg.in/alog.v1/log"
+	"github.com/antlinker/alog/log"
 )
 
 type _FileConfig struct {

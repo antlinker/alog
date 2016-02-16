@@ -1,6 +1,6 @@
 package alog
 
-import "gopkg.in/alog.v1/log"
+import "github.com/antlinker/alog/log"
 
 // 加载默认配置
 func loadDefaultConfig() *log.LogConfig {

@@ -4,7 +4,7 @@ import (
 	"container/list"
 	"sync"
 
-	"gopkg.in/alog.v1/log"
+	"github.com/antlinker/alog/log"
 )
 
 // NewMemoryBuffer 创建新的Memory实例

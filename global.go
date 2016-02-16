@@ -1,6 +1,6 @@
 package alog
 
-import "gopkg.in/alog.v1/log"
+import "github.com/antlinker/alog/log"
 
 var (
 	// 提供全局的ALog

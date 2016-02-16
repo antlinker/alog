@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"gopkg.in/alog.v1"
+	"github.com/antlinker/alog"
 )
 
 const (

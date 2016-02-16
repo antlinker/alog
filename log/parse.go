@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"gopkg.in/alog.v1/utils"
+	"github.com/antlinker/alog/utils"
 )
 
 // GetDateData 获取日期数据

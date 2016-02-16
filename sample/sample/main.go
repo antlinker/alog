@@ -3,7 +3,7 @@ package main
 import (
 	"time"
 
-	"gopkg.in/alog.v1"
+	"github.com/antlinker/alog"
 )
 
 func main() {

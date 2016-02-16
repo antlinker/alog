@@ -3,7 +3,7 @@ package store
 import (
 	"text/template"
 
-	"gopkg.in/alog.v1/log"
+	"github.com/antlinker/alog/log"
 
 	"gopkg.in/mgo.v2"
 )

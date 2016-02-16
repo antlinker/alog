@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"gopkg.in/alog.v1/log"
+	"github.com/antlinker/alog/log"
 )
 
 func TestMongoStore(t *testing.T) {

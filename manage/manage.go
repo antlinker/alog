@@ -10,10 +10,10 @@ import (
 	"text/template"
 	"time"
 
-	"gopkg.in/alog.v1/buffer"
-	"gopkg.in/alog.v1/log"
-	"gopkg.in/alog.v1/store"
-	"gopkg.in/alog.v1/utils"
+	"github.com/antlinker/alog/buffer"
+	"github.com/antlinker/alog/log"
+	"github.com/antlinker/alog/store"
+	"github.com/antlinker/alog/utils"
 )
 
 // NewLogManage 创建新的LogManage实例
