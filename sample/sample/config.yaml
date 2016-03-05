@@ -1,0 +1,106 @@
+{
+	# 控制台输出配置
+	console: {
+		# 输出日志级别（1表示Debug,2表示Info,3表示Warn,4表示Error,5表示Fatal）
+  		# 1表示输出Debug及以上所有级别的日志
+		level: 1,
+		# 日志项模板
+		item: {
+				# 项模板
+		    # 模板字段说明：
+		    # ID 唯一标识
+		    # Time 日志发生时间
+		    # Level 级别
+		    # Tag 标签
+		    # Message 日志明细
+		    # FileName 文件名
+		    # ShortName 短文件名
+		    # FileFuncName 函数名
+		    # FileLine 文件行
+			tmpl: "{{.ID}} [{{.Time}}｜{{.Level}}｜{{.Tag}}]{{.ShortName}}:{{.FileLine}}:{{.Message}}",
+			# 时间模板
+		    # 模板字段说明：
+		    # Year 年份
+		    # Month 月份
+		    # Day 天数
+		    # Hour 小时
+		    # Minute 分钟
+		    # Second 秒
+		    # MilliSecond 毫秒
+			time: "{{.Hour}}:{{.Minute}}"
+		}
+	},
+	# 全局配置
+	global: {
+		# IsEnabled 是否启用日志
+		# 参数说明：
+		# 1表示启用
+		# 2表示不启用
+		# 默认值为1
+		enabled: 1,
+		# 是否打印到控制台
+  	# 1表示打印
+  	# 2表示不打印
+  	# 默认为不打印
+  	print: 1,
+  	# 日志输出规则
+  	# 参数说明：
+  	# 0表示所有配置输出
+  	# 1表示指定Global配置输出
+  	# 2表示指定Tag配置输出
+  	# 3表示指定Level配置输出
+  	# 默认为所有配置输出(0)
+  	rule: 1,
+  	# 日志级别
+		level: 1,
+  	# 输出文件信息
+  	# 1表示输出
+  	# 2表示不输出
+  	# 默认为输出(1)
+  	showfile: 1,
+  	# 文件信息调用层级
+  	# 默认为6(当前调用)
+  	caller: 6,
+  	# 目标存储
+  	# 指向store中定义的存储配置
+  	target: "file_global",
+  	# 缓冲区存储
+  	buffer: {
+  		# 存储引擎
+	    # 1表示内存存储
+	    # 2表示redis存储
+	    engine: 1,
+	    # 指向store中定义的存储配置
+	    # target: "redis_buffer"
+  	}
+	},
+	# 持久化存储配置
+	store: {
+		# 文件存储
+		file: {
+			# 唯一标识键
+			file_global: {
+			  # 文件存储路径
+		      filepath: "logs",
+		      # 文件名格式模板
+		      # 模板字段说明：
+		      # Year 年份
+		      # Month 月份
+		      # Day 天数
+		      # Level 日志级别
+		      # Tag 标签
+		      filename: "{{.Year}}{{.Month}}{{.Day}}.log",
+		      # 单个文件大小（单位KB）
+		      filesize: 2048,
+		      item: {
+		      	# 项模板
+        		# 字段说明同上
+        		tmpl: '{{.ID}} {{.Time}} {{.Level}} {{.Tag}} "{{.ShortName}} {{.FileFuncName}} {{.FileLine}}" {{.Message}}',
+        		# 时间模板
+		        # 字段说明同上
+		        time: "{{.Year}}-{{.Month}}-{{.Day}} {{.Hour}}:{{.Minute}}:{{.Second}}.{{.MilliSecond}}"
+		      }
+			}
+		}
+	}
+}
