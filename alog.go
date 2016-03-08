@@ -80,6 +80,26 @@ func (a *ALog) SetEnabled(enabled bool) {
 	a.config.Global.IsEnabled = v
 }
 
+// SetPrint 设置控制台输出日志
+func (a *ALog) SetPrint(v bool) {
+	vv := 2
+	if v {
+		vv = 1
+	}
+	a.config.Global.IsPrint = vv
+}
+
+// ReloadConfig 重置加载配置文件
+func (a *ALog) ReloadConfig(cfg string) error {
+	config := loadDefaultConfig()
+	err := utils.NewConfig(cfg).Read(config)
+	if err != nil {
+		return err
+	}
+	a.config = config
+	return nil
+}
+
 // GetConfig 获取配置文件信息
 func (a *ALog) GetConfig() *log.LogConfig {
 	return a.config
