@@ -97,6 +97,7 @@ func (a *ALog) ReloadConfig(cfg string) error {
 		return err
 	}
 	a.config = config
+	a.manage = manage.NewLogManage(config)
 	return nil
 }
 
