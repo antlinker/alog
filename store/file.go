@@ -78,13 +78,20 @@ func (fs *FileStore) fileName(item *log.LogItem) string {
 	fName = strings.TrimSuffix(fName, ext)
 	root := fs.config.Path
 	prefix := root + "/" + fName
-	filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+LB_FILEWALK:
+	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
 		if info.IsDir() || !strings.HasPrefix(path, prefix) {
 			return nil
 		}
 		filterFile = append(filterFile, info)
 		return nil
 	})
+	if err != nil {
+		goto LB_FILEWALK
+	}
 	if l := len(filterFile); l > 0 {
 		number = l - 1
 		for _, file := range filterFile {
