@@ -49,6 +49,7 @@ func (a *ALog) SetLogTag(tag string) {
 
 // SetLogLevel 设置日志输出级别
 func (a *ALog) SetLogLevel(level log.LogLevel) {
+	a.config.Console.Level = level
 	a.config.Global.Level = level
 }
 
