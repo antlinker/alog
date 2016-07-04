@@ -75,11 +75,17 @@ type _LogManage struct {
 }
 
 func (lm *_LogManage) Write(level log.LogLevel, tag log.LogTag, v ...interface{}) {
+	if lm.Config.Global.Level >= level {
+		return
+	}
 	msg := fmt.Sprint(v...)
 	lm.writeMsg(level, tag, msg)
 }
 
 func (lm *_LogManage) Writef(level log.LogLevel, tag log.LogTag, format string, v ...interface{}) {
+	if lm.Config.Global.Level >= level {
+		return
+	}
 	msg := fmt.Sprintf(format, v...)
 	lm.writeMsg(level, tag, msg)
 }
@@ -262,13 +268,13 @@ func (lm *_LogManage) store() {
 		if l == 0 {
 			continue
 		}
-		wg := new(sync.WaitGroup)
-		wg.Add(l)
 		for i, l := 0, len(targets); i < l; i++ {
-			go lm.writeStore(wg, targets[i], item)
+			lm.writeStore(targets[i], item)
 		}
-		wg.Wait()
 		atomic.AddInt64(&lm.storeTotal, 1)
+		if item.Level == log.FATAL {
+			os.Exit(1)
+		}
 	}
 }
 
@@ -316,8 +322,7 @@ func (lm *_LogManage) storeTargets(item *log.LogItem) (targets []string) {
 	return
 }
 
-func (lm *_LogManage) writeStore(wg *sync.WaitGroup, target string, item *log.LogItem) {
-	defer wg.Done()
+func (lm *_LogManage) writeStore(target string, item *log.LogItem) {
 	store, ok := lm.Store[target]
 	if !ok {
 		return
