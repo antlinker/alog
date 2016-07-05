@@ -75,7 +75,7 @@ type _LogManage struct {
 }
 
 func (lm *_LogManage) Write(level log.LogLevel, tag log.LogTag, v ...interface{}) {
-	if lm.Config.Global.Level >= level {
+	if lm.Config.Global.Level > level {
 		return
 	}
 	msg := fmt.Sprint(v...)
@@ -83,7 +83,7 @@ func (lm *_LogManage) Write(level log.LogLevel, tag log.LogTag, v ...interface{}
 }
 
 func (lm *_LogManage) Writef(level log.LogLevel, tag log.LogTag, format string, v ...interface{}) {
-	if lm.Config.Global.Level >= level {
+	if lm.Config.Global.Level > level {
 		return
 	}
 	msg := fmt.Sprintf(format, v...)
@@ -91,11 +91,17 @@ func (lm *_LogManage) Writef(level log.LogLevel, tag log.LogTag, format string, 
 }
 
 func (lm *_LogManage) Console(level log.LogLevel, tag log.LogTag, v ...interface{}) {
+	if lm.Config.Console.Level > level {
+		return
+	}
 	msg := fmt.Sprint(v...)
 	lm.writeConsole(level, tag, msg)
 }
 
 func (lm *_LogManage) Consolef(level log.LogLevel, tag log.LogTag, format string, v ...interface{}) {
+	if lm.Config.Console.Level > level {
+		return
+	}
 	msg := fmt.Sprintf(format, v...)
 	lm.writeConsole(level, tag, msg)
 }
@@ -231,9 +237,7 @@ func (lm *_LogManage) levels(item *log.LogItem, fn func(log.LevelConfig) bool) {
 }
 
 func (lm *_LogManage) console(item *log.LogItem) {
-	if lm.Config.Console.Level <= (*item).Level {
-		lm.stdout(lm.Template[log.TmplConsole], lm.Template[log.TmplConsoleTime], item)
-	}
+	lm.stdout(lm.Template[log.TmplConsole], lm.Template[log.TmplConsoleTime], item)
 }
 
 func (lm *_LogManage) systemLog(tag log.LogLevel, msg string) {
