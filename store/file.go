@@ -78,7 +78,6 @@ func (fs *FileStore) fileName(item *log.LogItem) string {
 	fName = strings.TrimSuffix(fName, ext)
 	root := fs.config.Path
 	prefix := root + "/" + fName
-LB_FILEWALK:
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -90,7 +89,8 @@ LB_FILEWALK:
 		return nil
 	})
 	if err != nil {
-		goto LB_FILEWALK
+		fmt.Println("FileStore Error:", err.Error())
+		return ""
 	}
 	if l := len(filterFile); l > 0 {
 		number = l - 1
@@ -135,7 +135,7 @@ func (fs *FileStore) Store(item *log.LogItem) error {
 	fs.createFolder()
 	fileName := fs.fileName(item)
 	if fileName == "" {
-		return fmt.Errorf("The file name is invalid.")
+		fileName = fmt.Sprintf("%s.log", item.Time.Format("20060102150405"))
 	}
 	fileName = filepath.Join(fs.config.Path, fileName)
 	file, err := os.OpenFile(fileName, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0660)
