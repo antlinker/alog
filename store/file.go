@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"text/template"
 
@@ -45,6 +46,11 @@ func NewFileStore(config log.FileConfig) log.LogStore {
 	if msgTmpl == "" {
 		msgTmpl = log.DefaultMsgTmpl
 	}
+
+	if l := len(fpath); l > 0 && fpath[l-1] == '/' {
+		fpath = fpath[:l-1]
+	}
+
 	cfg := &_FileConfig{
 		Size:     size * 1024,
 		Path:     fpath,
@@ -52,69 +58,30 @@ func NewFileStore(config log.FileConfig) log.LogStore {
 		TimeTmpl: template.Must(template.New("").Parse(timeTmpl)),
 		MsgTmpl:  template.Must(template.New("").Parse(msgTmpl)),
 	}
-	return &FileStore{config: cfg}
+	fs := &FileStore{config: cfg}
+
+	// 创建日志目录
+	if err := fs.createFolder(); err != nil {
+		panic("创建目录发生错误：" + err.Error())
+	}
+
+	return fs
 }
 
 // FileStore 提供文件日志存储
 type FileStore struct {
-	config *_FileConfig
+	config   *_FileConfig
+	fileName string
+	file     *os.File
 }
 
 func (fs *FileStore) formatName(name string, num int) string {
 	if num > 0 {
-		return fmt.Sprintf("%s-%d", name, num)
+		ns := strconv.Itoa(num)
+		return fmt.Sprintf("%s-%s%d", name, strings.Repeat("0", 4-len(ns)), num)
 	} else {
 		return fmt.Sprintf("%s", name)
 	}
-}
-
-func (fs *FileStore) fileName(item *log.LogItem) string {
-	var (
-		number     int
-		filterFile []os.FileInfo
-	)
-	fName := log.ParseName(fs.config.NameTmpl, item)
-	ext := filepath.Ext(fName)
-	fName = strings.TrimSuffix(fName, ext)
-	root := fs.config.Path
-	prefix := root + "/" + fName
-	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if info.IsDir() || !strings.HasPrefix(path, prefix) {
-			return nil
-		}
-		filterFile = append(filterFile, info)
-		return nil
-	})
-	if err != nil {
-		fmt.Println("FileStore Error:", err.Error())
-		return ""
-	}
-	if l := len(filterFile); l > 0 {
-		number = l - 1
-		for _, file := range filterFile {
-			name := fs.formatName(fName, number)
-			ffName := file.Name()
-			ffName = strings.TrimSuffix(ffName, filepath.Ext(ffName))
-			if ffName == name {
-				if file.Size() >= fs.config.Size {
-					fName = fs.formatName(fName, number+1)
-				} else {
-					fName = name
-				}
-				break
-			}
-		}
-	}
-	if fName == "" {
-		return ""
-	}
-	if ext == "" {
-		ext = ".log"
-	}
-	return fName + ext
 }
 
 func (fs *FileStore) createFolder() error {
@@ -131,19 +98,86 @@ func (fs *FileStore) createFolder() error {
 	return nil
 }
 
-func (fs *FileStore) Store(item *log.LogItem) error {
-	fs.createFolder()
-	fileName := fs.fileName(item)
-	if fileName == "" {
-		fileName = fmt.Sprintf("%s.log", item.Time.Format("20060102150405"))
-	}
-	fileName = filepath.Join(fs.config.Path, fileName)
-	file, err := os.OpenFile(fileName, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0660)
+func (fs *FileStore) changeName(name, ext string) string {
+	var (
+		number int
+	)
+
+	prefix := fs.config.Path + "/" + name
+	err := filepath.Walk(fs.config.Path, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() || !strings.HasPrefix(path, prefix) {
+			return nil
+		}
+		number++
+		return nil
+	})
 	if err != nil {
-		return err
+		fmt.Println("FileStore Error:", err.Error())
+		return ""
 	}
-	defer file.Close()
+
+	return fmt.Sprintf("%s-%d%s", name, number, ext)
+}
+
+func (fs *FileStore) getFile(item *log.LogItem) (file *os.File, err error) {
+	fileName := log.ParseName(fs.config.NameTmpl, item)
+	if fileName == "" {
+		fileName = fmt.Sprintf("unknown.%s.log", item.Time.Format("20060102"))
+	}
+
+	ext := filepath.Ext(fileName)
+	prefix := strings.TrimSuffix(fileName, ext)
+	if strings.HasPrefix(fs.fileName, prefix) {
+		if fs.file != nil {
+			file = fs.file
+			return
+		} else {
+			fs.fileName = fs.changeName(prefix, ext)
+		}
+	} else {
+		if fs.file != nil {
+			fs.file.Close()
+			fs.file = nil
+		}
+		fs.fileName = fileName
+	}
+
+	if fs.file == nil {
+		file, err = os.OpenFile(fmt.Sprintf("%s/%s", fs.config.Path, fs.fileName), os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0660)
+		if err != nil {
+			return
+		}
+		fs.file = file
+		return
+	}
+
+	file = fs.file
+	return
+}
+
+func (fs *FileStore) Store(item *log.LogItem) (err error) {
+
+	file, err := fs.getFile(item)
+	if err != nil {
+		return
+	}
+
 	logInfo := log.ParseLogItem(fs.config.MsgTmpl, fs.config.TimeTmpl, item)
 	_, err = file.WriteString(logInfo)
-	return err
+	if err != nil {
+		return
+	}
+
+	finfo, err := file.Stat()
+	if err != nil {
+		return
+	} else if finfo.Size() >= fs.config.Size {
+		fs.file.Close()
+		fs.file = nil
+	}
+
+	return
 }

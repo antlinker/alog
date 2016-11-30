@@ -9,10 +9,10 @@ import (
 
 func TestFileStore(t *testing.T) {
 	var config log.FileConfig
-	config.FileSize = 10
+	config.FileSize = 10 * 1024
 	store := NewFileStore(config)
 	var err error
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 100000; i++ {
 		var item log.LogItem
 		item.ID = uint64(i)
 		item.Time = time.Now()
