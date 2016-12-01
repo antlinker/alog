@@ -19,6 +19,9 @@ const (
 	// DefaultFileSize 默认单个日志文件大小为2048KB
 	DefaultFileSize = 2048
 
+	// DefaultFileGCInterval 默认文件清理周期为720分钟
+	DefaultFileGCInterval = 720
+
 	// DefaultPrint 默认输出日志到控制台
 	DefaultPrint = 1
 

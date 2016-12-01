@@ -156,6 +156,10 @@ $ go get github.com/antlinker/alog
 		      filename: "{{.Year}}{{.Month}}{{.Day}}.log",
 		      # 单个文件大小（单位KB）
 		      filesize: 2048,
+              # 文件保留天数（0表示保留所有文件）
+		      retain: 0,
+              # 文件清理周期（单位分钟）
+		      interval: 720,
 		      item: {
 		      	# 项模板
         		# 字段说明同上

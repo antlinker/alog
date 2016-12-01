@@ -151,6 +151,7 @@ type FileConfig struct {
 	// FilePath 文件存储路径,
 	// 默认值为logs
 	FilePath string `json:"filepath" yaml:"filepath"`
+
 	// FileNameTmpl 文件名格式模板
 	// 模板字段说明：
 	// Year 年份
@@ -160,14 +161,24 @@ type FileConfig struct {
 	// Tag 标签
 	// 默认值为{{.Year}}{{.Month}}{{.Day}}.log
 	FileNameTmpl string `json:"filename" yaml:"filename"`
+
 	// FileSize 单个文件大小（单位KB）,
 	// 默认值为512KB
 	FileSize int64 `json:"filesize" yaml:"filesize"`
+
 	// Item 日志项配置
 	// 默认值：
 	// time:{{.Year}}-{{.Month}}-{{.Day}} {{.Hour}}:{{.Minute}}:{{.Second}}.{{.MilliSecond}}
 	// tmpl:{{.ID}} {{.Time}} {{.Level}} {{.Tag}} "{{.FileName}} {{.FileFuncName}} {{.FileLine}}" {{.Message}}
 	Item LogItemConfig `json:"item" yaml:"item"`
+
+	// 文件保留天数,
+	// 默认值为0(保留全部文件)
+	RetainDay int `json:"retian" yaml:"retain"`
+
+	// 清理文件周期(单位分钟)
+	// 默认为720分钟
+	GCInterval int `json:"interval" yaml:"interval"`
 }
 
 // ElasticConfig ElasticSearch持久化存储

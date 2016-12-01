@@ -4,19 +4,21 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"text/template"
+	"time"
 
 	"github.com/antlinker/alog/log"
 )
 
 type _FileConfig struct {
-	Size     int64
-	Path     string
-	NameTmpl *template.Template
-	TimeTmpl *template.Template
-	MsgTmpl  *template.Template
+	Size       int64
+	Path       string
+	RetainDay  int
+	GCInterval time.Duration
+	NameTmpl   *template.Template
+	TimeTmpl   *template.Template
+	MsgTmpl    *template.Template
 }
 
 // NewFileStore 创建新的FileStore实例
@@ -27,6 +29,7 @@ func NewFileStore(config log.FileConfig) log.LogStore {
 		filename = config.FileNameTmpl
 		timeTmpl = config.Item.TimeTmpl
 		msgTmpl  = config.Item.Tmpl
+		interval = config.GCInterval
 	)
 	if size == 0 {
 		size = log.DefaultFileSize
@@ -47,22 +50,35 @@ func NewFileStore(config log.FileConfig) log.LogStore {
 		msgTmpl = log.DefaultMsgTmpl
 	}
 
+	if interval == 0 {
+		interval = log.DefaultFileGCInterval
+	}
+
 	if l := len(fpath); l > 0 && fpath[l-1] == '/' {
 		fpath = fpath[:l-1]
 	}
 
 	cfg := &_FileConfig{
-		Size:     size * 1024,
-		Path:     fpath,
-		NameTmpl: template.Must(template.New("").Parse(filename)),
-		TimeTmpl: template.Must(template.New("").Parse(timeTmpl)),
-		MsgTmpl:  template.Must(template.New("").Parse(msgTmpl)),
+		Size:       size * 1024,
+		Path:       fpath,
+		NameTmpl:   template.Must(template.New("").Parse(filename)),
+		TimeTmpl:   template.Must(template.New("").Parse(timeTmpl)),
+		MsgTmpl:    template.Must(template.New("").Parse(msgTmpl)),
+		RetainDay:  config.RetainDay,
+		GCInterval: time.Duration(interval) * time.Minute,
 	}
 	fs := &FileStore{config: cfg}
 
 	// 创建日志目录
 	if err := fs.createFolder(); err != nil {
 		panic("创建目录发生错误：" + err.Error())
+	}
+
+	if config.RetainDay > 0 {
+		// 清理过期的文件
+		go func() {
+			fs.gc()
+		}()
 	}
 
 	return fs
@@ -75,13 +91,27 @@ type FileStore struct {
 	file     *os.File
 }
 
-func (fs *FileStore) formatName(name string, num int) string {
-	if num > 0 {
-		ns := strconv.Itoa(num)
-		return fmt.Sprintf("%s-%s%d", name, strings.Repeat("0", 4-len(ns)), num)
-	} else {
-		return fmt.Sprintf("%s", name)
+// 执行文件清理
+func (fs *FileStore) gc() {
+	ct := time.Now()
+	err := filepath.Walk(fs.config.Path, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+		if info.ModTime().Before(ct.AddDate(0, 0, -fs.config.RetainDay)) {
+			os.Remove(path)
+		}
+		return nil
+	})
+
+	if err != nil {
+		fmt.Println("FileStore GC Error:", err.Error())
 	}
+
+	time.AfterFunc(fs.config.GCInterval, fs.gc)
 }
 
 func (fs *FileStore) createFolder() error {
@@ -103,11 +133,13 @@ func (fs *FileStore) changeName(name, ext string) string {
 		number int
 	)
 
-	prefix := fs.config.Path + "/" + name
+	prefix := fmt.Sprintf("%s/%s", fs.config.Path, name)
+
 	err := filepath.Walk(fs.config.Path, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
+
 		if info.IsDir() || !strings.HasPrefix(path, prefix) {
 			return nil
 		}
@@ -116,7 +148,7 @@ func (fs *FileStore) changeName(name, ext string) string {
 	})
 	if err != nil {
 		fmt.Println("FileStore Error:", err.Error())
-		return ""
+		return fmt.Sprintf("%s%s", name, ext)
 	}
 
 	return fmt.Sprintf("%s-%d%s", name, number, ext)
@@ -129,7 +161,7 @@ func (fs *FileStore) getFile(item *log.LogItem) (file *os.File, err error) {
 	}
 
 	ext := filepath.Ext(fileName)
-	prefix := strings.TrimSuffix(fileName, ext)
+	prefix := fileName[:len(fileName)-len(ext)]
 	if strings.HasPrefix(fs.fileName, prefix) {
 		if fs.file != nil {
 			file = fs.file
