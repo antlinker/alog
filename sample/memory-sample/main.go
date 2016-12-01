@@ -10,7 +10,7 @@ import (
 
 const (
 	// 写入日志条数
-	_LogNum = 100000
+	_LogNum = 1000000
 	// 日志信息长度
 	_DataLen = 512
 )

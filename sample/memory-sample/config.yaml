@@ -8,7 +8,7 @@
 			file_global: {
 		      filepath: "logs",
 		      filename: "{{.Year}}{{.Month}}{{.Day}}.log",
-		      filesize: 204800,
+		      filesize: 20480,
 		      item: {
         		tmpl: '{{.Time}} {{.Level}} {{.Tag}} "{{.FileName}} {{.FileFuncName}} {{.FileLine}}" {{.Message}}',
 		        time: "{{.Year}}-{{.Month}}-{{.Day}} {{.Hour}}:{{.Minute}}:{{.Second}}.{{.MilliSecond}}"

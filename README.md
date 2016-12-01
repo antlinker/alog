@@ -248,8 +248,6 @@ func main() {
 	alog.WarnC("Warn console info...")
 	alog.Error("Error info...")
 	alog.ErrorC("Error console info...")
-	alog.Fatal("Fatal info...")
-	alog.FatalC("Fatal console info...")
 	time.Sleep(2 * time.Second)
 }
 ```
@@ -272,6 +270,13 @@ func main() {
 2016-01-18 13:38:09.721 Warn Sample "main.go main.main 16" Warn info...
 2016-01-18 13:38:09.721 Error Sample "main.go main.main 18" Error info...
 2016-01-18 13:38:09.721 Fatal Sample "main.go main.main 20" Fatal info...
+```
+
+### 范例`sample/memory-sample`输出结果
+> 每条日志文件大小20M
+
+```
+总条数：1000000,总耗时：24.00s,每条日志长度：512B,每秒写入日志条数：41666
 ```
 
 ## License
